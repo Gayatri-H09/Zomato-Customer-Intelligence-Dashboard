@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zomato Bangalore BI Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Plotly -->
+  <script src="https://cdn.plot.ly/plotly-3.3.0.min.js"></script>
+
+  <style>
+    :root {
+      /* Dark red theme */
+      --zomato-red: #8b0000;
+      --zomato-red-soft: #b0171f;
+      --zomato-red-dark: #4b050b;
+      --bg-light: #f4f4f4;
+      --bg-hero: #ffffff;
+      --card-bg: #ffffff;
+      --text-dark: #1f1f1f;
+      --text-muted: #777777;
+      --shadow-soft: 0 14px 36px rgba(0,0,0,0.12);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(139,0,0,0.11) 0, transparent 45%),
+        radial-gradient(circle at bottom right, rgba(75,5,11,0.12) 0, #f4f4f4 55%);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    /* HEADER / NAVBAR --------------------------------------------------- */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(120deg, rgba(75,5,11,0.97), rgba(139,0,0,0.97));
+      color: #fff;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.35);
+      padding: 10px 6vw;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: #fff;
+      color: var(--zomato-red);
+      border-radius: 14px;
+      padding: 5px 14px;
+      font-weight: 800;
+      text-transform: lowercase;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      transform: translateY(0);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .logo-badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 16px rgba(0,0,0,0.45);
+    }
+
+    .logo-text {
+      font-size: 0.95rem;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    .logo-text span {
+      display: block;
+      font-size: 0.73rem;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.85rem;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 4px 0;
+      border-bottom: 2px solid transparent;
+      opacity: 0.85;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: 0.2s ease-in-out;
+    }
+
+    .nav-links a:hover {
+      border-color: #fff;
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .nav-pill {
+      font-size: 0.75rem;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.8);
+      opacity: 0.95;
+      background: rgba(255,255,255,0.08);
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 6vw 50px;
+    }
+
+    section {
+      margin-top: 32px;
+    }
+
+    .section-tag {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--zomato-red-dark);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-size: 1.7rem;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    .section-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 780px;
+      margin-bottom: 18px;
+    }
+
+    /* HERO -------------------------------------------------------------- */
+
+    .hero-wrapper {
+      background: radial-gradient(circle at top right, rgba(139,0,0,0.08) 0, transparent 60%),
+                  var(--bg-hero);
+      border-radius: 26px;
+      box-shadow: var(--shadow-soft);
+      padding: 20px 22px 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(139,0,0,0.12);
+    }
+
+    .hero-accent {
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(255,255,255,0.9) 0, rgba(255,255,255,0) 60%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.3fr);
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+      align-items: stretch;
+    }
+
+    .hero-main-title {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .hero-main-sub {
+      font-size: 0.95rem;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .hero-question-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--zomato-red-dark);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .hero-question {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .metric {
+      background: linear-gradient(135deg, #fff7f8, #ffffff);
+      border-radius: 14px;
+      padding: 10px 11px;
+      border: 1px solid rgba(139,0,0,0.12);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .metric:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+
+    .metric-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--zomato-red-dark);
+    }
+
+    .metric-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: #faf4f4;
+      border: 1px solid rgba(0,0,0,0.05);
+      color: #4b050b;
+      font-weight: 500;
+    }
+
+    /* CARDS / LAYOUT ---------------------------------------------------- */
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px 18px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(0,0,0,0.03);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.16);
+      border-color: rgba(139,0,0,0.18);
+    }
+
+    .card-ghost {
+      background: linear-gradient(145deg, rgba(75,5,11,0.98), rgba(139,0,0,0.97));
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      color: #fff;
+    }
+
+    .card-ghost .insights-list li {
+      color: rgba(255,255,255,0.92);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .plot {
+      width: 100%;
+      height: 340px;
+    }
+
+    .insights-list {
+      font-size: 0.9rem;
+      padding-left: 18px;
+    }
+
+    .insights-list li {
+      margin-bottom: 6px;
+      color: var(--text-dark);
+    }
+
+    .code-block {
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      background: #111;
+      color: #f8f8f8;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding-bottom: 16px;
+    }
+
+    /* RESPONSIVE -------------------------------------------------------- */
+
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+      header {
+        padding: 10px 4vw;
+      }
+      main {
+        padding: 18px 4vw 40px;
+      }
+      .hero,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="nav-left">
+      <div class="logo-badge">zomato</div>
+      <div class="logo-text">
+        Bangalore Restaurant Insights
+        
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#market">Market</a>
+      <a href="#customers">Customers</a>
+      <a href="#predictive">Predictive</a>
+      <a href="#insights">Actions</a>
+      <a href="#methodology">Methodology</a>
+      
+    </div>
+  </div>
+</header>
+  
+<main>
+
+  <!-- OVERVIEW / HERO -->
+  <section id="overview">
+    <p class="section-tag">Executive Dashboard</p>
+    <h2 class="section-title">How can Zomato optimise its presence in Bangalore?</h2>
+    <p class="section-subtitle">
+      This dashboard uses the Zomato Bangalore Restaurants dataset to analyse location dynamics,
+      pricing, cuisine mix and customer ratings, and to build a predictive model that estimates
+      restaurant ratings from operational and contextual factors.
+    </p>
+
+    <div class="hero-wrapper">
+      <div class="hero-accent"></div>
+      <div class="hero">
+        <div>
+          <p class="hero-main-title">A data-driven view of Bangalore’s food scene</p>
+          <p class="hero-main-sub">
+            The analysis covers restaurant density across localities, cuisine preferences,
+            price–rating relationships and the impact of online ordering and table booking
+            on customer satisfaction.
+          </p>
+
+          <p class="hero-question-label">Core business question</p>
+          <p class="hero-question">
+            How can Zomato improve customer engagement and optimise its restaurant portfolio in Bangalore
+            by leveraging insights on location, price, cuisine and service features?
+          </p>
+
+          <div class="metrics-grid">
+            <div class="metric">
+              <div class="metric-label">Restaurants analysed</div>
+              <div class="metric-value">51,000+</div>
+              <div class="metric-note">Zomato Bangalore dataset</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Model performance</div>
+              <div class="metric-value">R² ≈ 0.67</div>
+              <div class="metric-note">Random Forest · MAE ≈ 0.14</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Key hotspots</div>
+              <div class="metric-value">BTM · HSR · Koramangala</div>
+              <div class="metric-note">Highest restaurant density</div>
+            </div>
+          </div>
+
+          <div class="chip-row">
+            <div class="chip">Descriptive analytics</div>
+            <div class="chip">Diagnostic analytics</div>
+            <div class="chip">Predictive model</div>
+            <div class="chip">Prescriptive actions</div>
+          </div>
+        </div>
+
+        <div class="card-ghost">
+          <p style="font-size:0.95rem; font-weight:600; margin-bottom:6px;">Key findings snapshot</p>
+          <ul class="insights-list">
+            <li>Restaurant supply is heavily concentrated in BTM, HSR and Koramangala.</li>
+            <li>Mid–high cost restaurants tend to achieve higher ratings than very low-cost venues.</li>
+            <li>Votes (engagement) correlate strongly with rating stability and reliability.</li>
+            <li>Online ordering and table booking are associated with slightly higher ratings.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKET / LOCATIONS -->
+  <section id="market">
+    <p class="section-tag">Market & Location</p>
+    <h2 class="section-title">Where are restaurants concentrated, and how does location affect performance?</h2>
+    <p class="section-subtitle">
+      This section looks at restaurant density by locality and compares average ratings and cost levels
+      across different parts of Bangalore.
+    </p>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Top locations by number of restaurants</p>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">
+          High-density localities indicate strong demand but also intense competition.
+        </p>
+        <div id="plot-top-locations" class="plot"></div>
+      </div>
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Location insights</p>
+        <ul class="insights-list">
+          <li>BTM records the highest restaurant count, signalling a saturated but important micro-market.</li>
+          <li>Koramangala, Indiranagar and Whitefield combine high density with relatively strong ratings.</li>
+          <li>Medium-density areas with improving ratings represent opportunities for targeted expansion.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS / CUISINES -->
+  <section id="customers">
+    <p class="section-tag">Customers & Cuisines</p>
+    <h2 class="section-title">What do customers prefer, and how does price relate to satisfaction?</h2>
+    <p class="section-subtitle">
+      This section examines cuisine popularity, rating distributions and the relationship between price,
+      votes and ratings to understand customer behaviour on the platform.
+    </p>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Most popular cuisines</p>
+        <div id="plot-top-cuisines" class="plot"></div>
+      </div>
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Rating distribution</p>
+        <div id="plot-rating-dist" class="plot"></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Cost for two vs rating</p>
+        <div id="plot-cost-vs-rating" class="plot"></div>
+      </div>
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Votes vs rating</p>
+        <div id="plot-votes-vs-rating" class="plot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREDICTIVE MODEL -->
+  <section id="predictive">
+    <p class="section-tag">Predictive Analytics</p>
+    <h2 class="section-title">How well can we predict restaurant ratings?</h2>
+    <p class="section-subtitle">
+      A Random Forest regression model was trained using location, cuisines, cost, online ordering,
+      table booking and votes to estimate the cleaned numeric rating for each restaurant.
+    </p>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:6px;">Model summary</p>
+        <ul class="insights-list">
+          <li>Target: numeric rating (<code>rate</code>).</li>
+          <li>Features: <code>location</code>, <code>cuisines</code>, <code>votes</code>,
+              <code>approx_cost_for_two</code>, <code>online_order</code>, <code>book_table</code>.</li>
+          <li>Algorithm: Random Forest Regressor with mixed numeric/categorical preprocessing.</li>
+          <li>Performance: R² ≈ 0.67, MAE ≈ 0.14 on the held-out test set.</li>
+        </ul>
+        <div class="code-block">
+          # Example (Python)<br/>
+          y_pred = model.predict(X_test)<br/>
+          r2 = r2_score(y_test, y_pred)<br/>
+          mae = mean_absolute_error(y_test, y_pred)
+        </div>
+      </div>
+
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Top predictive features</p>
+        <div id="plot-feature-importance" class="plot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS & RECOMMENDATIONS -->
+  <section id="insights">
+    <p class="section-tag">Insights & Recommendations</p>
+    <h2 class="section-title">What should Zomato do with these findings?</h2>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Strategic insights</p>
+        <ul class="insights-list">
+          <li>High-density areas (BTM, HSR, Koramangala) are commercially important but highly competitive.</li>
+          <li>Premium localities deliver stronger ratings, suggesting scope for curated “best of” experiences.</li>
+          <li>Engagement (votes) is a strong predictor of rating quality and customer trust.</li>
+          <li>Online ordering and table booking are associated with more stable and slightly higher ratings.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Recommended actions</p>
+        <ul class="insights-list">
+          <li>Deepen presence in high-rating zones through loyalty programmes and targeted campaigns.</li>
+          <li>Promote niche cuisines to diversify choice beyond dominant North Indian and Chinese offerings.</li>
+          <li>Incentivise customers to leave votes/reviews to strengthen the rating system.</li>
+          <li>Encourage restaurants with strong potential to adopt online ordering and table booking.</li>
+          <li>Use the predictive model to flag under-exposed but high-potential restaurants for promotion.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHODOLOGY / AI -->
+  <section id="methodology">
+    <p class="section-tag">Data, Methodology & AI</p>
+    <h2 class="section-title">How was this analysis carried out?</h2>
+
+    <div class="two-col">
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">Data & preparation</p>
+        <ul class="insights-list">
+          <li>Dataset: Zomato Bangalore Restaurants (Kaggle).</li>
+          <li>Cleaning: removing duplicates, parsing ratings, normalising cost and votes, handling missing values.</li>
+          <li>Feature engineering: cuisine count, popularity score, encoded locations and cuisines.</li>
+          <li>Tools: Python (pandas, seaborn, Plotly, scikit-learn) in a Kaggle/Jupyter environment.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p style="font-weight:600; margin-bottom:4px;">AI usage</p>
+        <p style="font-size:0.9rem;">
+          Generative AI (ChatGPT) was used to support code generation, debugging, visual design ideas
+          and narrative structuring. All code was executed, tested and adapted to the actual dataset,
+          and analytical decisions were validated against the underlying data.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Zomato Bangalore Business Intelligence Dashboard · Final Project · MSc in Business Analytics for Decision Makers
+  </footer>
+
+</main>
+
+<!-- JS PLACEHOLDERS: replace dummy arrays with real data -->
+<script>
+window.onload = function() {
+
+  // 1) Top locations
+  (function() {
+    var locations = ['BTM', 'HSR', 'Koramangala 5th Block', 'JP Nagar', 'Whitefield', 'Indiranagar', 'Jayanagar', 'Marathahalli', 'Bannerghatta Road', 'Bellandur', 'Electronic City', 'Koramangala 1st Block', 'Brigade Road', 'Koramangala 7th Block', 'Koramangala 6th Block', 'Sarjapur Road', 'Ulsoor', 'Koramangala 4th Block', 'MG Road', 'Banashankari'] ;
+    var counts    = [5124, 2523, 2504, 2235, 2144, 2083, 1926, 1846, 1630, 1286, 1258, 1238, 1218, 1181, 1156, 1065, 1023, 1017, 918, 906] ;
+
+    Plotly.newPlot("plot-top-locations", [{
+      type: "bar",
+      x: counts,
+      y: locations,
+      orientation: "h",
+      marker: { color: "#8b0000" }
+    }], {
+      margin: {l: 100, r: 20, t: 30, b: 40},
+      xaxis: {title: "Number of restaurants"},
+      yaxis: {title: "Location"}
+    }, {displayModeBar: false});
+  })();
+
+  // 2) Top cuisines
+  (function() {
+    var cuisines = ['North Indian', 'Chinese', 'South Indian', 'Fast Food', 'Biryani', 'Continental', 'Desserts', 'Cafe', 'Beverages', 'Italian', 'Bakery', 'Street Food', 'Pizza', 'Burger', 'Seafood', 'Ice Cream', 'Andhra', 'Mughlai', 'Rolls', 'American'] ;
+    var counts   = [21085, 15547, 8644, 8096, 6492, 5765, 5633, 5303, 4747, 3389, 2840, 2595, 2073, 2009, 1810, 1774, 1760, 1570, 1470, 1461] ;
+
+    Plotly.newPlot("plot-top-cuisines", [{
+      type: "bar",
+      x: cuisines,
+      y: counts,
+      marker: { color: "#b0171f" }
+    }], {
+      margin: {l: 50, r: 20, t: 30, b: 80},
+      xaxis: {tickangle: -40},
+      yaxis: {title: "Count"}
+    }, {displayModeBar: false});
+  })();
+
+  // 3) Rating distribution
+  (function() {
+    var ratings = [4.3, 3.3, 3.7, 4.1, 3.5, 4.0, 3.6, 4.4, 3.8, 4.2, 3.1, 4.1, 4.5, 3.4, 3.8, 4.0, 3.2, 3.5, 3.9, 3.7, 4.2, 4.6, 3.7, 3.9, 4.4, 3.3, 3.6, 4.0, 3.5, 3.6, 4.2, 4.3, 3.8, 3.1, 3.0, 3.9, 3.4, 4.3, 4.0, 4.1, 4.2, 3.4, 4.1, 3.7, 3.5, 3.9, 3.9, 4.3, 4.2, 3.8, 3.7, 3.4, 4.1, 3.8, 3.8, 3.4, 4.1, 3.6, 3.6, 4.2, 3.5, 2.9, 2.4, 3.3, 3.5, 4.0, 3.3, 3.2, 3.4, 3.9, 3.0, 3.8, 3.2, 4.5, 3.4, 3.8, 4.3, 3.9, 3.0, 3.5, 4.4, 3.8, 3.3, 4.1, 4.1, 3.7, 3.5, 3.9, 2.7, 3.7, 3.2, 4.0, 4.2, 3.3, 4.1, 3.1, 3.9, 3.9, 3.2, 3.9, 3.2, 3.6, 3.6, 4.2, 4.1, 3.3, 4.2, 4.2, 4.2, 4.0, 3.8, 3.7, 3.7, 4.1, 3.8, 3.8, 3.0, 3.7, 4.5, 3.5, 3.7, 4.3, 4.4, 4.4, 3.7, 3.8, 3.6, 4.4, 4.1, 3.3, 3.3, 3.9, 3.1, 3.5, 3.9, 3.4, 4.4, 3.4, 3.6, 3.2, 3.7, 3.4, 3.4, 3.8, 4.0, 4.0, 4.2, 3.6, 4.0, 3.9, 4.0, 4.6, 4.4, 3.3, 3.9, 4.6, 3.8, 3.1, 3.4, 3.7, 3.7, 3.6, 4.2, 3.2, 3.6, 3.8, 3.4, 3.1, 3.9, 4.1, 4.0, 4.1, 3.0, 3.3, 3.1, 4.5, 4.0, 3.6, 4.2, 2.9, 3.5, 3.6, 4.0, 3.6, 3.5, 4.0, 3.6, 4.4, 3.7, 3.9, 3.2, 3.8, 3.3, 3.9, 2.8, 4.1, 3.8, 3.8, 3.2, 2.9, 3.9, 4.4, 3.9, 2.3, 3.6, 3.5, 2.8, 4.3, 4.1, 3.1, 3.1, 4.4, 3.5, 3.4, 3.3, 3.9, 3.5, 2.9, 3.5, 3.2, 3.1, 3.1, 4.0, 3.8, 4.3, 3.8, 3.3, 3.8, 4.0, 2.9, 4.0, 4.4, 4.1, 3.9, 3.6, 4.0, 3.4, 3.2, 2.2, 4.7, 3.3, 4.1, 4.0, 3.9, 3.6, 3.7, 3.4, 3.7, 3.9, 3.4, 3.0, 4.0, 4.2, 3.6, 3.9, 4.6, 4.0, 3.7, 4.1, 4.5, 3.4, 3.6, 2.6, 3.9, 2.6, 3.7, 4.0, 3.1, 3.5, 3.6, 4.3, 3.7, 4.0, 3.7, 3.9, 3.3, 3.8, 3.9, 2.8, 3.8, 3.8, 3.2, 4.1, 3.8, 2.9, 4.2, 3.1, 3.7, 3.1, 3.2, 3.6, 3.2, 3.7, 3.5, 4.2, 4.1, 4.2, 3.6, 2.8, 4.1, 4.1, 3.9, 4.4, 3.9, 3.9, 3.4, 3.6, 3.7, 3.5, 3.9, 4.4, 3.1, 4.1, 4.0, 4.0, 3.2, 3.9, 4.4, 3.5, 3.5, 3.6, 4.1, 2.9, 3.9, 4.7, 2.5, 3.9, 3.8, 3.6, 3.3, 4.0, 3.8, 4.3, 3.5, 3.2, 3.3, 4.1, 3.2, 3.3, 3.4, 3.8, 2.8, 4.1, 4.1, 3.9, 3.4, 3.2, 2.9, 3.6, 3.6, 3.4, 4.1, 3.8, 3.9, 3.5, 3.3, 4.4, 4.3, 4.0, 3.9, 4.3, 3.8, 4.0, 3.1, 3.3, 3.7, 3.4, 3.2, 4.5, 3.5, 3.6, 3.1, 4.4, 3.1, 4.0, 3.5, 3.6, 4.5, 4.1, 4.6, 3.9, 3.8, 3.7, 2.6, 3.1, 4.2, 4.1, 3.9, 4.1, 3.8, 3.6, 3.5, 4.1, 4.1, 3.7, 4.0, 4.2, 3.8, 4.1, 3.9, 3.9, 3.4, 3.5, 3.3, 3.6, 4.1, 3.7, 4.0, 3.9, 4.7, 3.6, 4.0, 3.3, 4.0, 3.8, 4.4, 3.3, 4.0, 2.9, 3.2, 4.4, 3.2, 3.9, 3.6, 4.3, 4.0, 3.5, 3.4, 3.3, 3.8, 3.6, 4.0, 4.1, 4.1, 4.1, 3.8, 4.0, 3.8, 2.9, 4.0, 3.7, 3.2, 3.0, 3.3, 3.8, 3.6, 3.8, 2.8, 3.3, 4.1, 3.7, 4.2, 4.6, 3.5, 2.7, 4.3, 4.1, 4.1, 2.6, 3.5, 4.6, 3.3, 3.8, 2.9, 3.3, 3.1, 3.6, 3.9, 3.8, 3.9, 4.1, 3.7, 3.8, 3.6, 3.6, 2.2, 3.1, 3.7, 3.9, 4.0, 3.6, 3.6, 3.8, 3.8, 3.4, 4.3, 3.8, 4.2, 3.6, 4.2, 4.2, 3.5, 4.0, 3.9, 3.7, 4.1, 3.5, 4.2, 2.9, 4.1, 3.3, 4.5, 3.8, 4.1, 3.2, 3.8, 3.6, 4.5, 4.5, 3.6, 4.0, 4.1, 3.9, 3.6, 4.1, 3.9, 3.7, 4.1, 3.7, 3.7, 3.7, 3.4, 3.6, 3.9, 4.2, 3.6, 4.0, 4.1, 3.5, 4.4, 3.2, 4.0, 3.4, 3.5, 4.0, 3.4, 3.1, 4.0, 3.9, 3.6, 3.8, 3.5, 3.7, 3.6, 4.3, 3.2, 3.9, 3.4, 3.5, 4.0, 3.1, 3.9, 3.7, 3.8, 4.4, 3.9, 3.6, 2.6, 4.0, 4.3, 3.6, 3.3, 3.6, 3.3, 3.7, 3.5, 3.1, 3.7, 3.4, 4.1, 3.2, 4.2, 4.1, 4.1, 3.7, 3.8, 3.5, 3.7, 3.8, 2.8, 3.4, 3.4, 3.0, 3.7, 4.5, 3.9, 4.0, 3.3, 3.8, 4.0, 3.7, 4.2, 3.1, 3.2, 4.2, 3.2, 3.8, 3.1, 4.0, 4.1, 3.1, 3.3, 3.2, 3.4, 3.2, 3.8, 3.3, 3.8, 3.5, 3.5, 3.7, 4.3, 3.9, 3.8, 3.6, 3.8, 3.9, 3.9, 3.4, 3.6, 3.2, 3.4, 3.6, 3.4, 2.8, 2.4, 4.0, 3.1, 3.8, 3.8, 3.2, 3.4, 3.9, 3.9, 4.2, 3.6, 4.0, 2.4, 3.5, 4.1, 3.8, 3.7, 3.4, 2.3, 3.8, 4.1, 4.4, 4.4, 3.5, 3.2, 3.3, 3.2, 3.3, 3.6, 3.8, 3.6, 3.2, 4.3, 3.7, 4.3, 4.7, 4.0, 3.9, 3.4, 3.6, 4.7, 3.8, 3.2, 3.3, 4.4, 3.5, 3.7, 3.6, 3.1, 3.8, 3.8, 3.9, 3.0, 3.5, 3.8, 4.0, 3.9, 3.4, 4.0, 4.1, 3.3, 4.2, 4.0, 4.3, 3.7, 3.7, 3.8, 3.5, 3.9, 3.8, 4.0, 3.1, 3.2, 3.9, 3.1, 4.3, 3.4, 4.3, 4.2, 3.1, 3.1, 3.7, 3.5, 4.1, 3.3, 4.0, 4.2, 4.2, 4.3, 3.7, 3.1, 3.7, 3.8, 4.0, 2.7, 4.3, 4.3, 3.7, 3.4, 3.7, 3.4, 4.3, 4.0, 3.9, 4.2, 3.7, 4.2, 4.0, 4.4, 3.7, 3.3, 4.1, 3.2, 4.1, 3.1, 3.6, 3.7, 2.9, 3.9, 3.6, 4.2, 3.9, 4.4, 3.7, 3.4, 4.9, 4.1, 3.6, 3.9, 3.6, 3.2, 3.6, 4.3, 3.3, 3.3, 3.5, 3.6, 4.4, 3.6, 3.0, 4.1, 4.1, 3.1, 4.0, 3.7, 3.8, 3.4, 4.1, 3.9, 3.5, 3.5, 2.9, 3.6, 4.1, 4.0, 4.0, 3.0, 3.7, 4.3, 3.1, 3.9, 3.2, 3.9, 3.9, 4.2, 3.9, 3.6, 3.8, 4.0, 3.8, 3.3, 4.2, 3.8, 3.9, 3.8, 4.2, 2.6, 3.5, 3.9, 4.3, 3.6, 2.9, 3.4, 3.7, 4.4, 3.3, 4.3, 3.1, 3.8, 3.4, 2.8, 3.8, 3.9, 3.7, 4.2, 4.5, 3.7, 4.3, 4.3, 3.5, 3.9, 3.8, 3.8, 3.7, 3.2, 3.6, 4.1, 4.0, 3.0, 2.7, 3.5, 3.7, 3.2, 4.4, 2.9, 4.2, 3.2, 3.6, 4.1, 4.2, 4.0, 3.6, 4.0, 4.0, 4.0, 3.9, 3.6, 3.9, 3.3, 4.1, 4.0, 3.4, 3.4, 3.2, 3.4, 3.5, 3.3, 4.5, 4.3, 4.0, 3.9, 4.2, 3.8, 4.2, 4.1, 4.1, 3.9, 3.4, 4.2, 4.4, 3.2, 3.3, 2.6, 3.2, 2.7, 3.4, 3.2, 4.0, 3.1, 3.7, 3.9, 3.9, 4.6, 4.1, 3.3, 4.3, 3.3, 3.8, 3.5, 4.1, 3.7, 3.8, 3.6, 3.0, 3.8, 3.9, 3.7, 3.2, 4.0, 3.1, 4.6, 3.4, 3.7, 3.5, 3.2, 4.2, 4.3, 3.9, 3.1, 3.0, 4.2, 3.7, 3.8, 3.4, 3.5, 4.0, 4.2, 3.7, 3.3, 3.4, 3.4, 3.8, 3.3, 4.3, 3.3, 3.4, 4.1, 3.7, 4.3, 4.0, 4.2, 2.9, 3.2, 3.7, 4.6, 3.5, 3.7, 4.3, 3.8, 3.8, 3.1, 3.6, 3.6, 3.7, 3.9, 3.0, 3.6, 3.8, 3.4, 3.3, 3.6, 3.7, 3.1, 4.2, 3.5, 4.0, 3.9, 3.5, 3.6, 3.7, 3.4, 4.1, 3.5, 3.6, 3.8, 4.2, 3.6, 3.7, 2.9, 3.7, 3.6, 3.7, 3.1, 3.5, 3.1, 4.2, 3.6, 4.1, 3.7, 3.7, 4.1, 4.1, 4.4, 3.9, 2.8, 4.0, 2.7, 3.3, 3.9, 3.1, 4.4, 4.3, 3.7, 4.4, 3.2, 3.2, 3.4, 4.4, 3.6, 4.2, 3.8, 4.5, 4.0, 3.3, 3.9, 3.3, 4.1, 3.9, 3.9, 3.7, 2.8, 2.6, 3.8, 3.8, 4.1, 4.1, 3.2, 4.0, 3.1, 4.2, 4.3, 3.1, 3.8, 4.4, 2.8, 4.5, 3.5, 3.3, 3.0, 4.1, 4.1, 3.3, 3.3, 2.4, 3.9, 3.8, 3.5, 4.2, 3.9, 3.7, 4.5, 3.8, 3.9, 3.1, 3.4, 3.8, 3.9, 4.0, 3.9, 4.0, 4.4, 3.4, 3.6, 3.6, 3.2, 3.5, 3.8, 3.6, 4.0, 4.1, 4.1, 3.9, 4.5, 4.0, 3.5, 4.4, 3.0, 3.7, 3.8, 3.9, 3.2, 3.9, 4.1, 3.3, 3.1, 4.2, 4.0, 3.9, 3.8, 3.8, 3.7, 3.2, 4.1, 4.0, 3.8, 4.1, 2.7, 4.0, 3.8, 4.4, 4.2, 3.8, 4.0, 4.0, 3.8, 3.8, 3.7, 3.8, 3.7, 4.0, 3.8, 3.5, 2.7, 3.9, 4.1, 4.0, 3.9, 3.8, 2.8, 4.0, 2.7, 3.2, 3.2, 4.5, 4.0, 3.4, 4.2, 3.0, 4.9, 3.6, 3.1, 3.9, 4.2, 4.1, 3.4, 2.7, 3.8, 4.0, 4.4, 4.0, 3.7, 3.5, 3.6, 3.2, 3.1, 4.3, 4.0, 3.4, 3.6, 3.1, 4.2, 3.2, 3.7, 3.6, 3.6, 4.6, 3.2, 3.4, 2.8, 3.8, 4.1, 4.6, 3.9, 4.6, 2.8, 4.4, 3.4, 3.5, 3.9, 3.7, 3.9, 4.2, 4.0, 3.4, 3.0, 3.2, 4.1, 3.4, 3.4, 3.7, 3.5, 2.8, 2.9, 4.0, 3.8, 4.0, 2.9, 3.3, 2.9, 4.0, 3.9, 3.7, 3.9, 3.7, 4.4, 3.8, 3.1, 3.9, 3.3, 4.0, 4.1, 3.4, 3.3, 3.9, 3.7, 4.1, 4.0, 4.0, 3.6, 3.6, 3.2, 4.3, 3.8, 3.7, 4.7, 3.4, 4.0, 4.1, 3.5, 3.6, 3.3, 3.3, 3.3, 4.1, 3.7, 3.2, 4.1, 3.5, 4.0, 3.8, 3.2, 4.2, 3.3, 3.9, 3.9, 3.3, 3.9, 3.3, 4.3, 3.7, 3.3, 3.3, 2.9, 3.9, 3.5, 3.6, 4.4, 4.3, 3.4, 4.4, 3.6, 4.0, 4.1, 4.1, 2.8, 3.9, 3.6, 4.3, 3.5, 4.0, 3.3, 4.2, 3.8, 3.7, 4.3, 3.7, 3.2, 2.8, 3.6, 4.1, 3.9, 3.9, 3.7, 3.5, 3.6, 3.4, 3.9, 3.5, 4.4, 3.8, 3.2, 3.9, 3.9, 3.6, 3.5, 3.5, 2.9, 3.6, 4.0, 3.5, 3.2, 3.5, 3.8, 4.1, 3.6, 3.5, 3.9, 4.1, 4.7, 3.7, 3.2, 3.6, 3.9, 3.4, 4.3, 3.4, 3.9, 3.9, 3.6, 3.9, 3.6, 4.3, 3.2, 4.0, 3.9, 3.5, 3.5, 3.7, 3.3, 2.6, 4.6, 3.5, 3.9, 3.9, 3.6, 3.1, 3.2, 3.7, 2.7, 3.4, 4.5, 3.8, 4.0, 3.9, 3.4, 4.0, 3.2, 3.3, 3.6, 4.0, 3.7, 3.2, 3.3, 4.1, 3.7, 4.4, 3.9, 3.5, 3.7, 4.0, 4.1, 4.0, 3.6, 3.0, 3.5, 4.5, 3.3, 2.9, 3.7, 4.5, 4.5, 3.3, 3.7, 4.1, 3.7, 4.6, 3.7, 3.7, 3.5, 3.6, 3.4, 3.4, 3.4, 4.1, 3.8, 4.0, 3.7, 3.3, 3.9, 4.4, 3.2, 4.0, 4.0, 2.6, 3.7, 3.7, 4.1, 3.6, 3.8, 4.1, 2.8, 4.2, 2.9, 3.7, 4.2, 3.8, 4.0, 4.1, 4.3, 3.2, 2.8, 4.6, 3.4, 4.3, 3.4, 4.1, 3.3, 3.5, 3.9, 3.8, 3.3, 3.5, 3.8, 3.6, 4.6, 3.7, 3.4, 3.4, 3.8, 3.9, 2.9, 3.4, 4.1, 4.8, 4.1, 4.1, 3.4, 3.7, 3.2, 3.0, 3.6, 2.7, 3.8, 4.2, 3.3, 3.9, 3.3, 3.6, 3.7, 4.1, 3.5, 4.1, 3.6, 3.9, 4.0, 3.3, 3.9, 3.7, 3.9, 3.9, 3.6, 3.7, 4.0, 4.2, 4.1, 4.2, 2.9, 3.6, 3.7, 3.2, 3.6, 3.3, 3.8, 3.4, 4.5, 4.0, 3.6, 3.9, 3.8, 2.8, 2.9, 3.3, 3.6, 3.7, 4.2, 3.9, 4.3, 4.0, 3.5, 3.6, 3.6, 3.6, 3.8, 3.4, 4.2, 3.8, 3.6, 3.4, 3.9, 3.7, 3.9, 3.7, 2.5, 3.2, 2.9, 4.0, 3.7, 4.2, 3.4, 3.6, 3.7, 3.9, 4.2, 4.1, 3.9, 3.2, 2.7, 3.4, 3.6, 3.8, 3.9, 3.6, 4.3, 3.8, 4.2, 3.4, 4.0, 4.1, 4.0, 4.4, 3.4, 3.1, 3.3, 4.1, 3.7, 2.9, 3.8, 4.0, 3.6, 4.0, 4.5, 4.0, 3.6, 4.6, 3.9, 4.3, 3.4, 4.1, 4.0, 4.2, 3.9, 3.9, 4.0, 2.5, 3.2, 3.3, 3.7, 3.4, 3.5, 3.6, 3.8, 3.9, 4.1, 4.1, 2.9, 3.6, 3.3, 3.8, 3.3, 3.8, 3.2, 3.7, 3.7, 3.3, 3.4, 3.2, 3.6, 4.3, 3.8, 4.3, 3.5, 3.6, 4.1, 4.3, 4.4, 4.0, 4.0, 3.4, 4.1, 4.2, 3.5, 3.0, 4.0, 3.9, 3.9, 3.6, 3.6, 4.4, 3.7, 4.0, 2.3, 4.6, 4.3, 4.3, 3.6, 3.5, 3.6, 4.0, 3.8, 4.0, 4.6, 4.0, 4.1, 3.4, 3.6, 3.8, 3.6, 3.6, 2.9, 3.8, 3.8, 4.2, 3.5, 3.9, 3.4, 3.7, 4.5, 3.7, 3.6, 3.3, 3.4, 3.3, 3.8, 3.7, 3.8, 3.5, 3.2, 3.3, 3.7, 3.8, 2.7, 3.6, 3.9, 4.3, 3.9, 3.7, 4.0, 4.0, 3.9, 3.5, 3.8, 3.6, 3.7, 3.9, 3.0, 4.2, 4.4, 3.7, 4.1, 4.3, 3.9, 4.6, 3.7, 3.8, 4.4, 3.8, 3.3, 4.0, 3.1, 3.4, 3.4, 3.9, 4.0, 3.6, 3.8, 3.8, 3.9, 4.2, 4.1, 3.9, 3.5, 3.8, 3.0, 3.9, 3.1, 3.9, 2.8, 4.3, 4.4, 2.3, 3.8, 4.3, 3.3, 3.4, 3.2, 2.8, 3.7, 2.8, 3.4, 3.4, 3.1, 3.6, 3.8, 4.1, 3.9, 3.6, 4.0, 3.4, 4.0, 4.3, 3.9, 3.8, 3.9, 4.3, 3.3, 4.4, 3.3, 3.9, 4.2, 4.4, 3.3, 3.4, 4.3, 3.2, 3.3, 3.7, 3.5, 4.1, 3.8, 3.7, 3.9, 3.1, 3.7, 3.1, 3.1, 3.7, 3.9, 4.0, 3.2, 3.2, 3.2, 4.3, 3.0, 3.1, 4.0, 3.7, 3.9, 4.3, 3.3, 4.1, 3.3, 3.0, 4.5, 3.3, 3.8, 3.2, 4.6, 3.4, 3.6, 3.5, 3.3, 3.0, 4.1, 3.5, 2.6, 3.0, 3.4, 3.8, 3.7, 3.9, 2.8, 4.1, 3.3, 4.5, 3.6, 3.0, 3.8, 3.1, 3.5, 3.2, 4.1, 3.4, 3.8, 3.1, 2.9, 4.5, 3.7, 4.5, 4.1, 3.9, 3.7, 3.4, 3.6, 4.2, 3.9, 4.0, 3.6, 3.1, 3.8, 4.2, 3.9, 3.7, 4.3, 2.8, 4.0, 3.0, 3.9, 3.4, 3.9, 3.9, 4.2, 3.7, 4.1, 3.8, 3.7, 4.0, 3.6, 4.0, 3.7, 3.7, 3.8, 3.7, 3.4, 4.2, 4.0, 3.1, 3.9, 3.4, 4.0, 3.3, 4.0, 3.4, 3.8, 4.0, 4.3, 4.2, 4.0, 3.1, 4.1, 3.2, 3.4, 2.7, 3.5, 3.4, 3.7, 4.5, 3.2, 3.5, 4.0, 3.8, 3.5, 4.1, 3.3, 3.4, 3.1, 3.9, 3.1, 3.9, 3.5, 4.1, 4.1, 3.3, 4.0, 3.2, 3.9, 4.1, 4.2, 4.3, 4.1, 3.7, 3.7, 2.8, 3.6, 4.0, 4.1, 4.0, 3.5, 3.7, 4.3, 3.7, 4.3, 3.6, 3.1, 4.4, 3.4, 4.4, 3.0, 3.4, 3.9, 3.5, 4.0, 3.8, 3.7, 4.0, 4.4, 3.1, 3.0, 3.5, 3.4, 3.8, 3.7, 4.1, 3.6, 3.1, 3.1, 2.9, 3.1, 3.6, 4.0, 3.8, 4.3, 3.8, 3.6, 4.1, 3.0, 2.9, 3.8, 4.3, 4.2, 3.4, 3.4, 3.7, 3.3, 3.3, 3.4, 3.2, 3.3, 3.1, 3.6, 3.7, 3.6, 3.6, 3.7, 3.9, 3.6, 4.0, 4.4, 3.5, 4.0, 4.0, 3.8, 4.4, 3.6, 4.0, 4.2, 4.2, 4.1, 4.4, 3.3, 3.2, 3.7, 3.9, 3.6, 2.8, 3.4, 4.0, 3.6, 3.1, 3.2, 3.6, 2.7, 3.1, 3.9, 4.1, 3.6, 3.8, 4.1, 4.0, 3.1, 3.8, 3.5, 3.3, 3.7, 4.6, 4.0, 3.0, 2.7, 3.9, 3.6, 3.0, 3.3, 4.4, 2.4, 3.9, 3.5, 3.9, 3.8, 3.2, 3.7, 4.0, 4.2, 3.6, 3.4, 4.2, 3.9, 4.1, 3.9, 4.0, 3.9, 3.1, 3.4, 3.6, 4.6, 3.6, 3.8, 4.2, 3.3, 3.6, 3.9, 2.9, 3.6, 3.8, 4.2, 4.2, 4.5, 3.6, 4.2, 4.0, 3.7, 3.5, 3.9, 3.7, 3.2, 3.0, 3.6, 4.2, 4.5, 3.5, 3.5, 3.5, 3.9, 3.1, 3.7, 4.3, 4.1, 4.2, 4.1, 4.2, 4.1, 3.7, 3.8, 4.1, 4.3, 4.9, 2.9, 4.0, 3.9, 3.5, 3.6, 3.3, 3.8, 3.5, 3.9, 4.0, 4.3, 3.9, 3.8, 3.7, 4.0, 4.3, 3.9, 3.6, 3.2, 4.3, 3.8, 3.8, 4.3, 3.7, 4.4, 3.0, 3.6, 3.0, 3.2, 3.4, 4.0, 3.6, 3.5, 3.2, 3.1, 3.9, 3.2, 3.9, 3.8, 3.7, 4.3, 4.3, 3.8, 3.5, 3.2, 4.7, 3.9, 3.6, 4.1, 4.2, 4.1, 3.9, 3.8, 3.6, 4.2, 3.5, 4.1, 3.4, 4.0, 4.1, 4.1, 3.9, 2.6, 4.1, 4.0, 3.6, 3.6, 3.1, 4.0, 3.1, 3.1, 3.7, 4.3, 3.7, 4.4, 4.0, 3.6, 3.5, 3.8, 3.2, 4.1, 3.2, 4.2, 3.2, 3.8, 4.1, 4.1, 4.0, 4.0, 3.3, 3.8, 3.5, 3.4, 3.2, 3.5, 3.9, 3.2, 3.3, 4.1, 3.0, 3.9, 3.9, 3.2, 4.0, 3.7, 3.8, 4.0, 4.2, 3.7, 4.0, 3.7, 4.3, 3.0, 3.3, 3.3, 3.1, 4.0, 4.3, 4.4, 3.5, 4.0, 3.1, 4.2, 3.2, 2.5, 3.9, 3.5, 4.4, 3.6, 4.1, 3.9, 3.5, 3.4, 3.7, 3.5, 3.7, 3.8, 3.6, 3.7, 3.5, 3.9, 3.7, 3.9, 3.0, 3.3, 3.2, 3.5, 4.0, 4.1, 3.2, 4.0, 3.4, 3.6, 3.5, 3.4, 3.7, 4.2, 3.3, 3.4, 4.1, 3.6, 4.0, 4.2, 3.4, 3.8, 3.6, 3.9, 3.5, 3.6, 2.6, 3.9, 4.3, 3.5, 4.0, 3.7, 4.0, 4.5, 3.7, 4.3, 3.8, 3.0, 4.4, 4.2, 3.9, 3.9, 4.2, 3.3, 3.2, 4.2, 3.6, 3.8, 4.5, 2.7, 4.1, 3.6, 4.2, 3.9, 3.9, 2.8, 4.3, 4.3, 3.4, 2.9, 3.1, 3.3, 3.0, 3.9, 3.9, 3.4, 3.6, 4.2, 3.5, 4.1, 4.0, 3.2, 3.3, 2.9, 3.3, 3.9, 3.9, 3.9, 4.0, 4.2, 3.0, 4.0, 3.7, 3.7, 3.2, 2.7, 3.8, 3.2, 3.6, 4.3, 3.5, 2.8, 4.0, 4.3, 3.8, 3.2, 3.9, 3.7, 4.1, 4.0, 3.9, 3.3, 3.9, 4.3, 3.0, 4.2, 3.9, 3.8, 3.6, 4.2, 3.4, 3.6, 4.2, 3.4, 3.2, 4.4, 3.8, 4.1, 3.5, 3.7, 3.8, 4.1, 4.1, 3.3, 4.0, 3.8, 2.8, 4.4, 4.1, 3.6, 3.9, 3.4, 4.1, 4.0, 4.2, 4.0, 4.1, 3.9, 3.8, 2.9, 3.2, 4.0, 4.2, 3.9, 3.2, 4.3, 3.8, 3.1, 3.2, 3.7, 3.3, 2.3, 3.7, 4.3, 4.1, 3.8, 3.3, 3.9, 3.7, 3.9, 2.3, 4.5, 4.4, 4.0, 2.9, 3.6, 4.3, 4.0, 4.6, 3.7, 4.3, 4.4, 3.6, 3.6, 3.2, 3.3, 4.0, 3.7, 2.8, 3.0, 4.0, 4.2, 3.8, 3.7, 3.8, 3.2, 3.2, 3.3, 4.1, 2.8, 4.3, 4.3, 4.2, 3.4, 3.2, 3.5, 3.9, 4.1, 3.7, 4.1, 3.8, 3.5, 3.6, 3.5, 3.5, 2.2, 3.6, 3.9, 3.2, 4.6, 4.4, 3.6, 3.6, 4.5, 3.7, 3.6, 3.1, 3.4, 4.0, 4.0, 3.9, 3.5, 3.6, 4.2, 3.1, 3.7, 2.7, 3.8, 3.9, 2.8, 2.8, 4.1, 4.3, 3.9, 2.6, 3.7, 3.8, 4.3, 4.3, 4.4, 3.8, 3.7, 4.0, 3.1, 3.1, 3.6, 3.5, 4.1, 4.2, 3.1, 3.6, 4.4, 3.7, 3.9, 3.3, 3.8, 4.0, 2.7, 4.2, 3.8, 3.7, 3.3, 3.7, 4.3, 3.5, 3.6, 3.6, 3.8, 3.6, 3.4, 3.6, 3.8, 3.6, 3.0, 3.7, 3.5, 3.2, 4.4, 3.5, 3.6, 3.5, 3.7, 3.0, 3.0, 3.7, 3.5, 4.2, 3.6, 4.0, 3.4, 3.9, 4.1, 3.8, 3.6, 3.4, 3.8, 3.9, 3.8, 3.4, 3.9, 2.5, 4.0, 3.2, 3.3, 4.4, 3.0, 3.6, 3.2, 3.7, 2.9, 3.1, 3.6, 3.1, 3.4, 3.8, 3.7, 3.3, 4.6, 4.1, 3.7, 3.9, 3.7, 3.2, 3.2, 3.9, 3.8, 3.9, 4.3, 3.6, 2.5, 3.6, 4.1, 4.4, 3.7, 4.0, 3.7, 3.4, 2.9, 4.1, 4.3, 3.8, 4.1, 3.9, 3.6, 3.9, 4.2, 3.8, 3.2, 4.0, 3.8, 3.9, 4.1, 3.3, 4.2, 2.6, 3.7, 3.7, 3.3, 3.0, 3.6, 4.1, 3.4, 3.1, 3.8, 2.7, 3.7, 4.2, 4.4, 4.0, 3.8, 3.3, 3.7, 3.3, 4.4, 3.7, 4.0, 3.9, 4.1, 4.0, 3.7, 3.1, 3.3, 3.6, 3.9, 3.6, 3.9, 3.4, 3.0, 3.7, 4.2, 3.9, 4.0, 3.8, 4.2, 3.1, 2.6, 3.3, 3.7, 3.6, 3.7, 3.1, 3.9, 3.4, 4.1, 2.5, 3.9, 4.2, 3.9, 2.4, 3.8, 3.0, 3.1, 3.9, 3.4, 3.0, 3.5, 3.8, 3.0, 3.8, 3.9, 3.5, 4.0, 4.2, 3.3, 4.4, 3.6, 3.6, 4.3, 3.9, 3.3, 4.3, 3.4, 4.5, 3.5, 3.9, 4.2, 3.4, 3.7, 3.8, 3.2, 4.1, 4.3, 4.2, 3.8, 3.6, 3.4, 4.2, 4.0, 3.4, 3.5, 3.5, 3.7, 4.7, 4.0, 3.1, 2.9, 3.3, 4.0, 3.4, 4.2, 4.3, 4.2, 3.0, 3.5, 4.4, 3.9, 3.0, 4.1, 4.1, 4.3, 4.0, 4.2, 3.7, 4.0, 3.9, 3.9, 3.9, 3.6, 3.6, 3.7, 3.7, 3.3, 3.7, 3.4, 4.5, 3.7, 3.8, 3.4, 4.2, 3.4, 3.8, 2.9, 3.8, 3.1, 4.1, 4.1, 3.9, 3.6, 4.2, 3.2, 3.8, 4.1, 3.8, 4.0, 3.5, 3.3, 3.7, 3.4, 4.2, 2.4, 3.6, 4.1, 4.1, 4.3, 4.0, 4.1, 3.9, 3.7, 3.1, 3.0, 4.4, 4.0, 4.0, 3.4, 4.1, 3.5, 3.2, 3.3, 4.1, 4.0, 3.4, 4.1, 4.2, 3.6, 3.3, 3.7, 3.9, 3.7, 3.1, 3.3, 4.3, 3.1, 3.4, 3.8, 2.8, 4.1, 4.0, 3.3, 3.7, 3.8, 3.2, 3.4, 3.3, 4.3, 4.2, 4.0, 3.6, 4.2, 3.9, 4.3, 3.2, 4.0, 3.7, 3.7, 3.7, 4.1, 3.0, 3.4, 3.7, 4.0, 3.2, 4.2, 2.8, 3.1, 4.0, 3.0, 2.6, 3.8, 4.3, 3.9, 3.8, 4.0, 3.3, 4.1, 4.3, 3.1, 3.8, 3.3, 3.7, 3.8, 3.9, 3.8, 3.5, 3.8, 3.6, 3.2, 3.4, 3.9, 3.5, 2.9, 3.9, 3.7, 3.5, 3.9, 3.6, 3.9, 3.8, 3.7, 4.0, 3.3, 3.8, 3.7, 4.5, 4.0, 3.6, 4.1, 3.4, 4.0, 4.2, 4.1, 3.1, 3.6, 3.2, 3.9, 4.1, 3.7, 3.1, 4.0, 4.4, 4.2, 3.7, 2.9, 3.3, 3.5, 2.6, 2.7, 4.1, 3.0, 4.6, 4.2, 3.6, 3.1, 4.0, 3.6, 4.7, 3.6, 3.8, 2.0, 3.4, 4.4, 4.2, 3.6, 3.3, 4.2, 3.5, 3.0, 3.1, 3.5, 3.4, 3.3, 3.5, 3.9, 4.9, 3.7, 3.2, 3.8, 3.7, 3.5, 3.5, 3.5, 3.3, 4.2, 3.5, 4.3, 3.7, 3.9, 3.6, 3.2, 3.9, 3.9, 3.5, 3.9, 3.2, 3.7, 4.1, 3.6, 3.8, 3.5, 4.5, 3.8, 4.0, 3.1, 4.1, 3.9, 4.4, 3.9, 3.5, 2.9, 3.7, 3.4, 4.0, 3.8, 3.9, 3.8, 3.2, 3.8, 4.1, 4.1, 3.0, 3.7, 4.0, 4.4, 3.9, 3.4, 4.5, 3.1, 3.8, 4.2, 3.9, 3.9, 3.7, 4.1, 3.9, 3.5, 3.6, 3.8, 3.9, 3.9, 3.7, 3.7, 3.3, 3.8, 4.3, 4.0, 3.4, 3.1, 2.8, 3.5, 3.9, 2.8, 3.6, 3.7, 3.5, 3.8, 4.0, 3.5, 3.7, 3.7, 3.6, 3.7, 3.4, 3.8, 3.7, 3.9, 4.0, 3.1, 3.8, 4.0, 4.2, 4.5, 3.0, 3.6, 3.8, 3.5, 3.1, 3.7, 3.5, 3.5, 3.3, 4.1, 3.3, 4.3, 3.6, 3.3, 3.6, 3.7, 3.6, 4.1, 4.1, 3.8, 3.8, 3.9, 4.1, 2.9, 4.0, 3.8, 3.5, 4.0, 3.4, 3.8, 3.5, 2.6, 3.5, 3.1, 4.4, 4.0, 4.0, 3.6, 4.2, 2.0, 4.2, 3.6, 3.4, 3.9, 3.6, 3.4, 3.8, 4.0, 4.3, 3.5, 4.0, 3.1, 3.1, 3.8, 3.1, 4.6, 4.3, 2.6, 3.7, 3.5, 3.6, 3.6, 3.2, 3.5, 3.9, 3.9, 4.0, 4.0] ;
+
+    Plotly.newPlot("plot-rating-dist", [{
+      type: "histogram",
+      x: ratings,
+      marker: { color: "#8b0000" }
+    }], {
+      margin: {l: 60, r: 20, t: 30, b: 40},
+      xaxis: {title: "Rating"},
+      yaxis: {title: "Frequency"}
+    }, {displayModeBar: false});
+  })();
+
+  // 4) Cost vs rating
+  (function() {
+    var cost   = [400.0, 500.0, 150.0, 150.0, 250.0, 300.0, 650.0, 450.0, 800.0, 350.0, 400.0, 700.0, 1300.0, 1700.0, 200.0, 300.0, 400.0, 1000.0, 300.0, 600.0, 500.0, 300.0, 300.0, 1600.0, 250.0, 400.0, 400.0, 600.0, 500.0, 1000.0, 300.0, 1000.0, 300.0, 700.0, 400.0, 500.0, 700.0, 400.0, 300.0, 250.0, 200.0, 550.0, 1500.0, 200.0, 200.0, 300.0, 1100.0, 1000.0, 850.0, 700.0, 700.0, 600.0, 300.0, 500.0, 350.0, 650.0, 1400.0, 100.0, 300.0, 500.0, 500.0, 1000.0, 250.0, 1200.0, 450.0, 300.0, 500.0, 400.0, 300.0, 300.0, 150.0, 400.0, 500.0, 1200.0, 700.0, 300.0, 400.0, 700.0, 1500.0, 450.0, 600.0, 500.0, 150.0, 600.0, 350.0, 450.0, 600.0, 450.0, 700.0, 750.0, 850.0, 650.0, 200.0, 1500.0, 400.0, 400.0, 500.0, 500.0, 500.0, 800.0, 200.0, 750.0, 450.0, 400.0, 600.0, 250.0, 500.0, 300.0, 600.0, 650.0, 600.0, 700.0, 300.0, 550.0, 550.0, 500.0, 650.0, 300.0, 250.0, 200.0, 200.0, 1000.0, 400.0, 800.0, 800.0, 300.0, 400.0, 200.0, 400.0, 400.0, 1700.0, 500.0, 1400.0, 1000.0, 1100.0, 300.0, 1000.0, 800.0, 600.0, 300.0, 200.0, 150.0, 600.0, 400.0, 400.0, 500.0, 800.0, 300.0, 350.0, 3000.0, 300.0, 1000.0, 1400.0, 1400.0, 400.0, 400.0, 450.0, 250.0, 200.0, 300.0, 500.0, 300.0, 500.0, 500.0, 600.0, 1200.0, 600.0, 1100.0, 550.0, 1800.0, 1600.0, 250.0, 150.0, 450.0, 300.0, 100.0, 150.0, 1000.0, 150.0, 550.0, 1000.0, 800.0, 300.0, 300.0, 800.0, 800.0, 400.0, 400.0, 3000.0, 150.0, 800.0, 1500.0, 250.0, 500.0, 600.0, 200.0, 500.0, 300.0, 800.0, 400.0, 200.0, 1500.0, 800.0, 450.0, 550.0, 100.0, 200.0, 1100.0, 1400.0, 1700.0, 350.0, 500.0, 400.0, 250.0, 600.0, 150.0, 350.0, 350.0, 300.0, 400.0, 1500.0, 1000.0, 500.0, 200.0, 1800.0, 400.0, 500.0, 400.0, 200.0, 150.0, 1500.0, 200.0, 300.0, 600.0, 500.0, 2100.0, 200.0, 800.0, 250.0, 200.0, 1200.0, 400.0, 300.0, 300.0, 400.0, 700.0, 1100.0, 600.0, 450.0, 600.0, 300.0, 800.0, 800.0, 650.0, 400.0, 200.0, 700.0, 500.0, 250.0, 1100.0, 500.0, 450.0, 350.0, 600.0, 600.0, 300.0, 150.0, 500.0, 900.0, 400.0, 2200.0, 400.0, 800.0, 1300.0, 500.0, 700.0, 1400.0, 600.0, 450.0, 600.0, 400.0, 300.0, 500.0, 150.0, 500.0, 800.0, 600.0, 1500.0, 150.0, 2000.0, 500.0, 600.0, 500.0, 300.0, 400.0, 150.0, 800.0, 600.0, 150.0, 600.0, 400.0, 350.0, 350.0, 700.0, 400.0, 300.0, 600.0, 400.0, 750.0, 400.0, 600.0, 100.0, 1400.0, 900.0, 200.0, 700.0, 400.0, 800.0, 250.0, 400.0, 400.0, 300.0, 550.0, 400.0, 350.0, 900.0, 200.0, 450.0, 250.0, 200.0, 300.0, 400.0, 1000.0, 300.0, 500.0, 900.0, 100.0, 2000.0, 1300.0, 150.0, 100.0, 150.0, 800.0, 1600.0, 500.0, 300.0, 100.0, 300.0, 800.0, 1400.0, 300.0, 650.0, 750.0, 750.0, 1000.0, 700.0, 200.0, 450.0, 700.0, 600.0, 1300.0, 200.0, 450.0, 400.0, 500.0, 500.0, 1700.0, 650.0, 400.0, 700.0, 1200.0, 1500.0, 200.0, 500.0, 500.0, 200.0, 800.0, 800.0, 250.0, 450.0, 400.0, 450.0, 400.0, 550.0, 600.0, 400.0, 150.0, 500.0, 400.0, 250.0, 400.0, 800.0, 600.0, 150.0, 500.0, 500.0, 600.0, 2400.0, 400.0, 350.0, 250.0, 150.0, 650.0, 1300.0, 600.0, 200.0, 600.0, 800.0, 600.0, 300.0, 2600.0, 450.0, 250.0, 200.0, 400.0, 1300.0, 750.0, 250.0, 800.0, 600.0, 600.0, 400.0, 250.0, 700.0, 300.0, 500.0, 1000.0, 1500.0, 700.0, 400.0, 400.0, 650.0, 400.0, 400.0, 400.0, 350.0, 300.0, 700.0, 400.0, 500.0, 300.0, 500.0, 300.0, 600.0, 200.0, 600.0, 300.0, 1200.0, 400.0, 450.0, 200.0, 100.0, 350.0, 450.0, 1600.0, 350.0, 400.0, 350.0, 1100.0, 800.0, 300.0, 1200.0, 750.0, 300.0, 250.0, 700.0, 1000.0, 800.0, 500.0, 500.0, 250.0, 900.0, 800.0, 150.0, 600.0, 300.0, 300.0, 800.0, 1900.0, 500.0, 300.0, 2000.0, 500.0, 200.0, 1100.0, 700.0, 800.0, 100.0, 500.0, 700.0, 200.0, 400.0, 300.0, 100.0, 1000.0, 300.0, 300.0, 1000.0, 800.0, 600.0, 450.0, 1500.0, 700.0, 250.0, 1000.0, 450.0, 900.0, 400.0, 200.0, 150.0, 650.0, 600.0, 1000.0, 3000.0, 450.0, 600.0, 800.0, 1900.0, 1600.0, 200.0, 200.0, 250.0, 500.0, 1000.0, 300.0, 1000.0, 500.0, 1000.0, 300.0, 100.0, 1300.0, 200.0, 2000.0, 850.0, 250.0, 300.0, 150.0, 400.0, 1100.0, 900.0, 600.0, 700.0, 300.0, 400.0, 250.0, 450.0, 350.0, 500.0, 300.0, 1400.0, 800.0, 350.0, 1000.0, 750.0, 200.0, 550.0, 700.0, 250.0, 450.0, 550.0, 1000.0, 300.0, 1200.0, 500.0, 200.0, 400.0, 500.0, 450.0, 700.0, 600.0, 600.0, 800.0, 400.0, 1500.0, 600.0, 800.0, 700.0, 500.0, 2000.0, 300.0, 200.0, 700.0, 300.0, 500.0, 700.0, 200.0, 100.0, 450.0, 700.0, 1200.0, 150.0, 500.0, 350.0, 500.0, 300.0, 600.0, 600.0, 600.0, 350.0, 1300.0, 1500.0, 600.0, 1300.0, 1300.0, 600.0, 550.0, 600.0, 400.0, 400.0, 300.0, 500.0, 350.0, 800.0, 650.0, 300.0, 200.0, 600.0, 1700.0, 750.0, 500.0, 300.0, 150.0, 1500.0, 500.0, 100.0, 1200.0, 500.0, 700.0, 1000.0, 1200.0, 550.0, 650.0, 2100.0, 300.0, 900.0, 700.0, 800.0, 300.0, 450.0, 300.0, 300.0, 1000.0, 350.0, 500.0, 350.0, 500.0, 350.0, 350.0, 200.0, 350.0, 1300.0, 400.0, 1300.0, 400.0, 650.0, 2000.0, 200.0, 750.0, 100.0, 400.0, 300.0, 400.0, 800.0, 800.0, 400.0, 500.0, 600.0, 1000.0, 400.0, 500.0, 300.0, 150.0, 400.0, 400.0, 600.0, 200.0, 450.0, 1400.0, 500.0, 200.0, 1600.0, 450.0, 450.0, 800.0, 300.0, 700.0, 1500.0, 1200.0, 200.0, 300.0, 400.0, 1000.0, 800.0, 100.0, 600.0, 200.0, 500.0, 500.0, 900.0, 500.0, 1000.0, 350.0, 500.0, 400.0, 1000.0, 1500.0, 600.0, 3000.0, 1300.0, 400.0, 1200.0, 600.0, 700.0, 1200.0, 300.0, 300.0, 400.0, 500.0, 650.0, 700.0, 300.0, 400.0, 300.0, 600.0, 300.0, 400.0, 200.0, 150.0, 400.0, 400.0, 250.0, 1000.0, 400.0, 1500.0, 500.0, 1200.0, 1500.0, 800.0, 400.0, 750.0, 400.0, 850.0, 200.0, 600.0, 250.0, 800.0, 400.0, 400.0, 600.0, 500.0, 1300.0, 900.0, 400.0, 300.0, 450.0, 300.0, 600.0, 500.0, 100.0, 850.0, 200.0, 450.0, 300.0, 450.0, 300.0, 400.0, 700.0, 2000.0, 350.0, 200.0, 350.0, 400.0, 500.0, 550.0, 400.0, 550.0, 500.0, 500.0, 200.0, 500.0, 1200.0, 400.0, 800.0, 600.0, 650.0, 400.0, 100.0, 300.0, 300.0, 300.0, 750.0, 1000.0, 200.0, 400.0, 1400.0, 400.0, 500.0, 1200.0, 900.0, 100.0, 1500.0, 500.0, 600.0, 500.0, 500.0, 800.0, 550.0, 350.0, 800.0, 750.0, 100.0, 1600.0, 500.0, 150.0, 400.0, 2000.0, 600.0, 500.0, 1100.0, 400.0, 400.0, 900.0, 500.0, 500.0, 400.0, 150.0, 300.0, 450.0, 200.0, 750.0, 800.0, 250.0, 2500.0, 300.0, 450.0, 300.0, 400.0, 150.0, 300.0, 800.0, 300.0, 300.0, 600.0, 250.0, 500.0, 600.0, 600.0, 400.0, 800.0, 200.0, 500.0, 800.0, 300.0, 200.0, 800.0, 450.0, 700.0, 500.0, 1700.0, 400.0, 2000.0, 450.0, 700.0, 650.0, 400.0, 100.0, 400.0, 650.0, 700.0, 150.0, 600.0, 300.0, 350.0, 500.0, 400.0, 600.0, 3000.0, 200.0, 800.0, 700.0, 500.0, 300.0, 300.0, 500.0, 400.0, 600.0, 800.0, 350.0, 300.0, 1500.0, 200.0, 900.0, 250.0, 500.0, 1000.0, 500.0, 300.0, 400.0, 250.0, 700.0, 1000.0, 300.0, 650.0, 1600.0, 150.0, 100.0, 500.0, 1000.0, 600.0, 200.0, 300.0, 600.0, 400.0, 500.0, 700.0, 500.0, 500.0, 500.0, 200.0, 200.0, 1700.0, 450.0, 200.0, 400.0, 350.0, 500.0, 800.0, 350.0, 200.0, 700.0, 600.0, 300.0, 1000.0, 800.0, 100.0, 600.0, 500.0, 350.0, 1000.0, 500.0, 700.0, 600.0, 350.0, 800.0, 450.0, 200.0, 1300.0, 400.0, 300.0, 600.0, 700.0, 100.0, 250.0, 250.0, 700.0, 250.0, 4000.0, 300.0, 1500.0, 100.0, 300.0, 750.0, 300.0, 2500.0, 600.0, 300.0, 2000.0, 300.0, 250.0, 500.0, 450.0, 300.0, 1000.0, 900.0, 250.0, 1100.0, 700.0, 250.0, 1500.0, 1000.0, 500.0, 300.0, 800.0, 1700.0, 1800.0, 600.0, 400.0, 250.0, 600.0, 350.0, 250.0, 2000.0, 1200.0, 600.0, 300.0, 750.0, 700.0, 500.0, 500.0, 400.0, 650.0, 300.0, 500.0, 500.0, 350.0, 700.0, 800.0, 300.0, 150.0, 600.0, 500.0, 1300.0, 400.0, 1500.0, 700.0, 300.0, 500.0, 300.0, 300.0, 400.0, 400.0, 900.0, 400.0, 400.0, 400.0, 400.0, 400.0, 300.0, 200.0, 300.0, 300.0, 600.0, 700.0, 500.0, 800.0, 400.0, 400.0, 200.0, 150.0, 2400.0, 350.0, 600.0, 500.0, 450.0, 600.0, 800.0, 350.0, 200.0, 800.0, 200.0, 500.0, 700.0, 650.0, 250.0, 600.0, 350.0, 300.0, 1000.0, 800.0, 200.0, 500.0, 400.0, 400.0, 1000.0, 800.0, 500.0, 400.0, 1000.0, 1500.0, 1100.0, 500.0, 500.0, 700.0, 400.0, 550.0, 750.0, 100.0, 500.0, 150.0, 300.0, 300.0, 300.0, 850.0, 500.0, 650.0, 800.0, 1200.0, 1000.0, 100.0, 650.0, 1100.0, 1200.0, 1500.0, 500.0, 1300.0, 500.0, 1000.0, 800.0, 250.0, 150.0, 400.0, 700.0, 450.0, 300.0, 400.0, 800.0, 400.0, 1800.0, 100.0, 1000.0, 400.0, 1400.0, 350.0, 800.0, 400.0, 800.0, 100.0, 200.0, 1000.0, 400.0, 250.0, 400.0, 750.0, 300.0, 650.0, 500.0, 400.0, 200.0, 750.0, 300.0, 400.0, 600.0, 250.0, 450.0, 300.0, 200.0, 750.0, 600.0, 400.0, 500.0, 500.0, 600.0, 550.0, 500.0, 1400.0, 450.0, 600.0, 400.0, 500.0, 800.0, 200.0, 550.0, 300.0, 550.0, 950.0, 350.0, 100.0, 300.0, 300.0, 1200.0, 400.0, 350.0, 500.0, 400.0, 230.0, 1000.0, 800.0, 600.0, 1000.0, 1000.0, 800.0, 1000.0, 350.0, 4000.0, 700.0, 650.0, 900.0, 400.0, 250.0, 200.0, 700.0, 900.0, 1100.0, 150.0, 800.0, 200.0, 1100.0, 300.0, 900.0, 300.0, 400.0, 400.0, 1700.0, 300.0, 250.0, 1000.0, 500.0, 150.0, 1800.0, 300.0, 400.0, 1100.0, 3400.0, 1500.0, 700.0, 700.0, 200.0, 400.0, 100.0, 300.0, 650.0, 200.0, 1500.0, 1100.0, 2000.0, 150.0, 350.0, 550.0, 200.0, 250.0, 300.0, 400.0, 1000.0, 1500.0, 900.0, 400.0, 800.0, 700.0, 300.0, 1300.0, 450.0, 150.0, 1500.0, 1500.0, 350.0, 200.0, 750.0, 450.0, 600.0, 350.0, 1000.0, 1100.0, 500.0, 900.0, 600.0, 300.0, 500.0, 350.0, 1700.0, 250.0, 400.0, 900.0, 150.0, 300.0, 2000.0, 500.0, 300.0, 500.0, 400.0, 1000.0, 400.0, 200.0, 400.0, 400.0, 300.0, 300.0, 400.0, 700.0, 500.0, 400.0, 300.0, 500.0, 750.0, 1000.0, 300.0, 300.0, 350.0, 300.0, 300.0, 1600.0, 1600.0, 600.0, 400.0, 900.0, 700.0, 200.0, 500.0, 500.0, 400.0, 800.0, 500.0, 550.0, 300.0, 250.0, 2100.0, 300.0, 250.0, 950.0, 400.0, 600.0, 600.0, 650.0, 1200.0, 400.0, 150.0, 400.0, 200.0, 350.0, 300.0, 150.0, 200.0, 350.0, 750.0, 1000.0, 2000.0, 750.0, 700.0, 1600.0, 400.0, 350.0, 1400.0, 150.0, 400.0, 800.0, 1500.0, 800.0, 1000.0, 1200.0, 450.0, 150.0, 400.0, 200.0, 300.0, 500.0, 600.0, 400.0, 250.0, 200.0, 450.0, 700.0, 800.0, 700.0, 300.0, 600.0, 500.0, 150.0, 500.0, 1000.0, 500.0, 600.0, 400.0, 1200.0, 200.0, 300.0, 400.0, 100.0, 400.0, 150.0, 400.0, 100.0, 1300.0, 300.0, 600.0, 600.0, 500.0, 1200.0, 1800.0, 200.0, 200.0, 700.0, 900.0, 900.0, 400.0, 300.0, 200.0, 350.0, 500.0, 500.0, 550.0, 1500.0, 600.0, 1300.0, 500.0, 500.0, 250.0, 800.0, 250.0, 2100.0, 1500.0, 450.0, 100.0, 400.0, 500.0, 300.0, 500.0, 350.0, 2000.0, 250.0, 500.0, 500.0, 100.0, 700.0, 400.0, 600.0, 350.0, 600.0, 800.0, 300.0, 200.0, 300.0, 500.0, 1200.0, 500.0, 150.0, 400.0, 1700.0, 300.0, 500.0, 600.0, 350.0, 350.0, 400.0, 600.0, 200.0, 800.0, 500.0, 100.0, 300.0, 500.0, 300.0, 2000.0, 200.0, 800.0, 300.0, 200.0, 400.0, 500.0, 600.0, 1100.0, 450.0, 350.0, 750.0, 700.0, 500.0, 700.0, 400.0, 250.0, 350.0, 400.0, 550.0, 150.0, 900.0, 500.0, 600.0, 400.0, 2100.0, 200.0, 600.0, 500.0, 300.0, 250.0, 500.0, 800.0, 600.0, 400.0, 200.0, 400.0, 150.0, 450.0, 150.0, 500.0, 500.0, 700.0, 600.0, 400.0, 500.0, 400.0, 650.0, 200.0, 700.0, 400.0, 500.0, 1700.0, 200.0, 250.0, 600.0, 1000.0, 400.0, 400.0, 600.0, 250.0, 600.0, 400.0, 300.0, 1600.0, 1600.0, 300.0, 1500.0, 200.0, 850.0, 150.0, 400.0, 350.0, 500.0, 700.0, 250.0, 500.0, 1700.0, 500.0, 400.0, 650.0, 250.0, 550.0, 1200.0, 2000.0, 300.0, 400.0, 450.0, 1000.0, 800.0, 300.0, 200.0, 300.0, 1000.0, 500.0, 1800.0, 300.0, 500.0, 300.0, 400.0, 600.0, 750.0, 450.0, 400.0, 250.0, 300.0, 200.0, 500.0, 350.0, 300.0, 800.0, 800.0, 500.0, 200.0, 200.0, 200.0, 400.0, 300.0, 650.0, 400.0, 350.0, 300.0, 500.0, 700.0, 2500.0, 550.0, 300.0, 450.0, 500.0, 1200.0, 350.0, 1400.0, 1100.0, 1200.0, 2200.0, 250.0, 600.0, 200.0, 250.0, 2000.0, 1500.0, 150.0, 350.0, 1500.0, 600.0, 800.0, 300.0, 400.0, 1500.0, 600.0, 500.0, 300.0, 2000.0, 1400.0, 400.0, 450.0, 700.0, 400.0, 500.0, 900.0, 900.0, 400.0, 400.0, 400.0, 600.0, 800.0, 750.0, 150.0, 700.0, 350.0, 600.0, 300.0, 550.0, 650.0, 550.0, 1000.0, 300.0, 750.0, 200.0, 800.0, 400.0, 400.0, 400.0, 3000.0, 400.0, 1500.0, 400.0, 600.0, 2000.0, 500.0, 500.0, 200.0, 1700.0, 250.0, 450.0, 400.0, 500.0, 1100.0, 550.0, 300.0, 600.0, 400.0, 300.0, 700.0, 600.0, 3400.0, 200.0, 100.0, 300.0, 1500.0, 500.0, 350.0, 500.0, 550.0, 100.0, 1000.0, 450.0, 100.0, 300.0, 500.0, 500.0, 250.0, 500.0, 600.0, 400.0, 300.0, 500.0, 400.0, 200.0, 700.0, 1000.0, 600.0, 150.0, 400.0, 1000.0, 250.0, 650.0, 400.0, 800.0, 1000.0, 450.0, 150.0, 300.0, 650.0, 500.0, 800.0, 300.0, 300.0, 300.0, 400.0, 450.0, 250.0, 1100.0, 400.0, 500.0, 400.0, 600.0, 500.0, 400.0, 1100.0, 400.0, 400.0, 250.0, 2000.0, 350.0, 1000.0, 300.0, 450.0, 400.0, 150.0, 300.0, 900.0, 1900.0, 700.0, 1000.0, 350.0, 300.0, 300.0, 350.0, 600.0, 550.0, 1000.0, 1500.0, 300.0, 250.0, 800.0, 200.0, 400.0, 1200.0, 200.0, 1500.0, 800.0, 1700.0, 150.0, 250.0, 700.0, 450.0, 300.0, 250.0, 900.0, 550.0, 1700.0, 600.0, 300.0, 200.0, 1200.0, 550.0, 350.0, 500.0, 650.0, 300.0, 200.0, 300.0, 200.0, 550.0, 250.0, 3000.0, 900.0, 800.0, 200.0, 2000.0, 2700.0, 500.0, 300.0, 450.0, 650.0, 800.0, 450.0, 600.0, 1500.0, 300.0, 400.0, 250.0, 250.0, 1000.0, 200.0, 600.0, 200.0, 450.0, 600.0, 500.0, 650.0, 500.0, 500.0, 300.0, 600.0, 300.0, 1100.0, 300.0, 400.0, 1300.0, 3000.0, 800.0, 300.0, 400.0, 300.0, 400.0, 1500.0, 350.0, 250.0, 500.0, 350.0, 800.0, 500.0, 200.0, 700.0, 400.0, 400.0, 250.0, 500.0, 800.0, 1400.0, 1200.0, 350.0, 1100.0, 1000.0, 300.0, 850.0, 1200.0, 300.0, 300.0, 1400.0, 200.0, 400.0, 300.0, 1400.0, 1500.0, 1700.0, 1300.0, 1400.0, 300.0, 300.0, 800.0, 350.0, 300.0, 300.0, 400.0, 300.0, 700.0, 600.0, 750.0, 650.0, 650.0, 300.0, 600.0, 450.0, 300.0, 300.0, 400.0, 1500.0, 150.0, 400.0, 450.0, 500.0, 400.0, 500.0, 350.0, 1000.0, 1000.0, 300.0, 900.0, 350.0, 1200.0, 350.0, 1000.0, 300.0, 350.0, 700.0, 400.0, 250.0, 350.0, 1400.0, 800.0, 1100.0, 500.0, 150.0, 450.0, 2200.0, 500.0, 700.0, 500.0, 300.0, 700.0, 450.0, 300.0, 650.0, 700.0, 1200.0, 550.0, 700.0, 150.0, 600.0, 600.0, 600.0, 500.0, 500.0, 900.0, 350.0, 300.0, 500.0, 1800.0, 250.0, 1100.0, 500.0, 200.0, 400.0, 300.0, 2000.0, 400.0, 2000.0, 300.0, 800.0, 3000.0, 200.0, 500.0, 400.0, 400.0, 300.0, 600.0, 1200.0, 300.0, 300.0, 300.0, 400.0, 300.0, 300.0, 650.0, 300.0, 1200.0, 500.0, 750.0, 900.0, 1500.0, 250.0, 1300.0, 150.0, 700.0, 600.0, 900.0, 600.0, 700.0, 600.0, 100.0, 150.0, 400.0, 500.0, 500.0, 300.0, 500.0, 650.0, 1100.0, 100.0, 300.0, 350.0, 500.0, 100.0, 400.0, 800.0, 700.0, 1000.0, 250.0, 300.0, 200.0, 150.0, 200.0, 400.0, 300.0, 400.0, 2500.0, 500.0, 350.0, 450.0, 500.0, 300.0, 300.0, 350.0, 150.0, 900.0, 500.0, 1200.0, 200.0, 400.0, 400.0, 550.0, 1000.0, 200.0, 400.0, 400.0, 400.0, 800.0, 300.0, 700.0, 200.0, 300.0, 200.0, 250.0, 200.0, 350.0, 450.0, 900.0, 500.0, 300.0, 200.0, 650.0, 250.0, 1500.0, 300.0, 400.0, 300.0, 800.0, 300.0, 200.0, 1500.0, 300.0, 300.0, 600.0, 600.0, 1000.0, 500.0, 250.0, 250.0, 200.0, 300.0, 650.0, 300.0, 400.0, 500.0, 150.0, 1400.0, 250.0, 300.0, 450.0, 1500.0, 450.0, 800.0, 600.0, 1500.0, 200.0, 300.0, 150.0, 600.0, 600.0, 250.0, 250.0, 150.0, 500.0, 1500.0, 200.0, 900.0, 1200.0, 700.0, 1600.0, 250.0, 1400.0, 400.0, 700.0, 2000.0, 1000.0, 600.0, 400.0, 400.0, 500.0, 600.0, 600.0, 1000.0, 950.0, 300.0, 200.0, 2200.0, 300.0, 500.0, 300.0, 500.0, 800.0, 400.0, 200.0, 200.0, 250.0, 500.0, 2500.0, 600.0, 200.0, 600.0, 300.0, 200.0, 600.0, 250.0, 350.0, 450.0, 150.0, 350.0, 400.0, 150.0, 400.0, 500.0, 500.0, 700.0, 300.0, 550.0, 400.0, 1000.0, 300.0, 400.0, 650.0, 250.0, 300.0, 250.0, 300.0, 300.0, 200.0, 500.0, 100.0, 1000.0, 300.0, 1200.0, 600.0, 1300.0, 400.0, 800.0, 500.0, 550.0, 400.0, 1000.0, 250.0, 500.0, 350.0, 800.0, 1200.0, 1200.0, 200.0, 250.0, 1800.0, 700.0, 550.0, 300.0, 600.0, 300.0, 400.0, 350.0, 400.0, 350.0, 250.0, 700.0, 400.0, 100.0, 1200.0, 300.0, 400.0, 150.0, 800.0, 800.0, 150.0, 850.0, 400.0, 400.0, 450.0, 600.0, 200.0, 400.0, 600.0, 300.0, 800.0, 3500.0, 1200.0, 600.0, 900.0, 300.0, 400.0, 700.0, 350.0, 1000.0, 200.0, 1000.0, 150.0, 300.0, 1600.0, 200.0, 200.0, 40.0, 1250.0, 600.0, 1400.0, 500.0, 300.0, 1000.0, 400.0, 200.0, 450.0, 1000.0, 600.0, 500.0, 200.0, 450.0, 500.0, 500.0, 350.0, 1200.0, 150.0, 150.0, 1400.0, 800.0, 250.0, 1500.0, 300.0, 1200.0, 200.0, 400.0, 700.0, 300.0, 800.0, 600.0, 200.0, 400.0, 400.0, 1100.0, 400.0, 400.0, 400.0, 1200.0, 250.0, 1400.0, 700.0, 600.0, 600.0, 200.0, 800.0, 300.0, 600.0, 500.0, 150.0, 300.0, 350.0, 450.0, 100.0, 300.0, 450.0, 400.0, 1000.0, 450.0, 200.0, 1900.0, 1200.0, 250.0, 1200.0, 750.0, 400.0, 300.0, 1000.0, 350.0, 300.0, 3000.0, 200.0, 700.0, 400.0, 400.0, 800.0, 450.0, 300.0, 800.0, 450.0, 950.0, 300.0, 200.0, 400.0, 300.0, 1000.0, 650.0, 400.0, 500.0, 450.0, 250.0, 250.0, 150.0, 1200.0, 100.0, 450.0, 900.0, 300.0, 400.0, 300.0, 250.0, 300.0, 900.0, 800.0, 400.0, 400.0, 300.0, 600.0, 800.0, 250.0, 800.0, 300.0, 1000.0, 300.0, 1700.0, 400.0, 300.0, 1000.0, 500.0, 300.0, 400.0, 600.0, 400.0, 300.0, 1000.0, 200.0, 300.0, 450.0, 300.0, 850.0, 550.0, 500.0, 800.0, 250.0, 1300.0, 400.0, 3000.0, 400.0, 250.0, 400.0, 300.0, 400.0, 400.0, 800.0, 300.0, 700.0, 200.0, 1500.0, 500.0, 500.0, 400.0, 400.0, 1100.0, 1400.0, 1700.0, 3000.0, 800.0, 500.0, 350.0, 400.0, 900.0, 500.0, 100.0, 800.0, 900.0, 450.0, 200.0, 1200.0, 400.0, 300.0, 400.0, 400.0, 600.0, 500.0, 1400.0, 500.0, 200.0, 350.0, 400.0, 600.0, 800.0, 1000.0, 500.0, 400.0, 500.0, 1200.0, 600.0, 1500.0, 1100.0, 250.0, 650.0, 300.0, 700.0, 300.0, 250.0, 350.0, 800.0, 400.0, 550.0, 800.0, 500.0, 400.0, 300.0, 250.0, 100.0, 500.0, 600.0, 800.0, 800.0, 1500.0, 700.0, 1200.0, 1300.0, 600.0, 700.0, 350.0, 500.0, 300.0, 800.0, 800.0, 300.0, 300.0, 550.0, 250.0, 400.0, 1200.0, 600.0, 1200.0, 1500.0, 1500.0, 500.0, 350.0, 450.0, 1200.0, 900.0, 150.0, 1000.0, 300.0, 300.0, 200.0, 600.0, 300.0, 1000.0, 1300.0, 500.0, 3500.0, 500.0, 300.0, 250.0, 1100.0, 300.0, 250.0, 600.0, 1000.0, 800.0, 750.0, 200.0, 2300.0, 2100.0, 300.0, 200.0, 200.0, 250.0, 400.0, 150.0, 500.0, 300.0, 250.0, 300.0, 600.0, 400.0, 400.0, 400.0, 600.0, 250.0, 1500.0, 1300.0, 300.0, 300.0, 800.0, 1000.0, 1500.0, 300.0, 1400.0, 500.0, 250.0, 500.0, 300.0, 650.0, 900.0, 300.0, 600.0, 500.0, 500.0, 600.0, 650.0, 300.0, 1000.0, 300.0, 300.0, 200.0, 500.0, 1700.0, 500.0, 1500.0, 150.0, 500.0, 900.0, 300.0, 300.0, 600.0, 1200.0, 250.0, 300.0, 800.0, 500.0, 250.0, 700.0, 800.0, 1300.0, 500.0, 400.0, 1300.0, 200.0, 450.0, 800.0, 600.0, 500.0, 600.0, 800.0, 200.0, 400.0, 300.0, 900.0, 400.0, 1000.0, 300.0, 500.0, 250.0, 500.0, 200.0, 550.0, 950.0, 400.0, 600.0, 300.0, 500.0, 600.0, 1000.0, 300.0, 1000.0, 1000.0, 400.0, 250.0, 700.0, 500.0, 250.0, 300.0, 350.0, 300.0, 700.0, 600.0, 200.0, 800.0, 600.0, 350.0, 450.0, 600.0, 250.0, 600.0, 500.0, 600.0, 850.0, 900.0, 300.0, 600.0, 200.0, 300.0, 500.0, 200.0, 400.0, 800.0, 300.0, 300.0, 650.0, 200.0, 200.0, 200.0, 400.0, 400.0, 200.0, 500.0, 1200.0, 750.0, 250.0, 1000.0, 250.0, 800.0, 200.0, 1000.0, 450.0, 750.0, 300.0, 1600.0, 600.0, 800.0, 400.0, 950.0, 500.0, 450.0, 300.0, 1000.0, 800.0, 300.0, 450.0, 400.0, 250.0, 300.0, 400.0, 400.0, 800.0, 400.0, 400.0, 300.0, 300.0, 1200.0, 800.0, 130.0, 500.0, 1200.0, 600.0, 250.0, 500.0, 1600.0, 600.0, 750.0, 200.0, 800.0, 100.0, 600.0, 1200.0, 600.0, 500.0, 200.0, 750.0, 800.0, 300.0, 300.0, 250.0, 500.0, 500.0, 450.0, 100.0, 1000.0, 300.0, 300.0, 600.0, 500.0, 500.0, 400.0, 1200.0, 400.0, 700.0, 300.0, 400.0, 500.0, 550.0, 300.0, 200.0, 300.0, 600.0, 400.0, 500.0, 700.0, 400.0, 500.0, 900.0, 400.0, 500.0, 600.0, 400.0, 900.0, 400.0, 400.0, 250.0, 500.0, 400.0, 800.0, 700.0, 1000.0, 400.0, 450.0, 500.0, 500.0, 800.0, 400.0, 350.0, 1000.0, 1200.0, 1000.0, 3000.0, 400.0, 400.0, 400.0, 150.0, 1100.0, 400.0, 800.0, 600.0, 400.0, 700.0, 400.0, 600.0, 300.0, 300.0, 350.0, 500.0, 250.0, 700.0, 250.0, 500.0, 800.0, 350.0, 300.0, 600.0, 500.0, 200.0, 1100.0, 250.0, 450.0, 1000.0, 400.0, 600.0, 600.0, 400.0, 200.0, 1000.0, 400.0, 400.0, 400.0, 250.0, 900.0, 300.0, 1300.0, 200.0, 1700.0, 350.0, 250.0, 3000.0, 1500.0, 600.0, 350.0, 1300.0, 600.0, 300.0, 300.0, 1000.0, 350.0, 400.0, 450.0, 1500.0, 800.0, 250.0, 450.0, 1500.0, 400.0, 250.0, 1200.0, 550.0, 400.0, 2000.0, 1300.0, 500.0, 2000.0, 600.0, 300.0, 600.0, 700.0, 200.0, 350.0, 500.0, 300.0, 600.0, 500.0, 400.0, 800.0, 300.0, 250.0, 300.0, 500.0, 200.0, 500.0, 750.0, 400.0, 350.0, 700.0, 2000.0, 750.0, 150.0, 350.0, 450.0, 250.0, 1500.0, 1200.0, 550.0, 450.0, 500.0, 500.0, 300.0, 300.0, 1500.0, 600.0, 500.0, 500.0, 600.0, 2800.0, 300.0, 800.0, 900.0, 350.0, 600.0, 500.0, 700.0, 750.0, 250.0, 300.0, 1500.0, 500.0, 650.0, 400.0, 500.0, 550.0, 800.0, 900.0, 300.0, 300.0, 700.0, 800.0, 700.0, 200.0, 250.0, 200.0, 1200.0, 300.0, 550.0, 200.0, 200.0, 600.0, 800.0, 1000.0, 300.0, 1500.0, 400.0, 250.0, 700.0, 700.0, 400.0, 400.0, 450.0, 300.0, 500.0, 300.0, 700.0, 500.0, 300.0, 400.0, 1000.0, 700.0, 600.0, 600.0, 500.0, 300.0, 1500.0, 1500.0, 200.0, 350.0, 500.0, 650.0, 250.0, 250.0, 1200.0, 800.0, 1700.0, 700.0, 600.0, 300.0, 800.0, 250.0, 1000.0, 600.0, 400.0, 400.0, 250.0, 350.0, 200.0, 1500.0, 600.0, 300.0, 400.0, 1500.0, 650.0, 350.0, 2400.0, 550.0, 700.0, 1900.0, 250.0, 500.0, 400.0, 300.0, 400.0, 600.0, 800.0, 400.0, 800.0, 300.0, 1000.0, 2000.0, 1600.0, 350.0, 200.0, 500.0, 50.0, 500.0, 200.0, 750.0, 450.0, 500.0, 450.0, 400.0, 500.0, 200.0, 1200.0, 200.0, 700.0, 250.0, 400.0, 500.0, 500.0, 400.0, 900.0, 300.0, 300.0, 400.0, 400.0, 350.0, 1200.0, 300.0, 200.0, 150.0, 200.0, 1200.0, 250.0, 300.0, 600.0, 300.0, 1100.0, 100.0, 550.0, 250.0, 800.0, 150.0, 500.0, 500.0, 600.0, 950.0, 350.0, 1000.0, 600.0, 300.0, 350.0, 500.0, 450.0, 200.0, 600.0, 500.0, 1100.0, 350.0, 150.0, 550.0, 1100.0, 200.0, 1000.0, 400.0, 250.0, 400.0, 200.0, 400.0, 700.0, 1500.0, 300.0, 250.0, 500.0, 300.0, 500.0, 1400.0, 300.0, 400.0, 250.0, 250.0, 2000.0, 500.0, 400.0, 200.0, 400.0, 800.0, 800.0, 700.0, 300.0, 400.0, 800.0, 350.0, 400.0, 400.0, 250.0, 450.0, 1500.0, 500.0, 500.0, 200.0, 500.0, 400.0, 500.0, 300.0, 500.0, 1000.0, 800.0, 3000.0, 250.0, 200.0] ;
+    var rating = [3.5, 4.2, 4.1, 3.6, 4.0, 4.0, 4.2, 4.5, 3.1, 3.3, 4.3, 3.4, 4.1, 4.3, 3.4, 3.7, 3.4, 2.6, 3.3, 3.7, 2.9, 3.2, 3.4, 4.3, 3.2, 3.6, 3.4, 3.6, 4.1, 4.1, 3.9, 3.9, 3.4, 4.0, 3.6, 3.2, 3.8, 3.4, 3.7, 3.1, 3.4, 3.9, 4.1, 3.8, 3.9, 3.9, 3.2, 4.2, 3.7, 3.7, 4.0, 2.8, 3.7, 3.3, 3.0, 3.0, 3.9, 3.3, 3.2, 3.8, 3.0, 3.6, 3.5, 2.6, 3.8, 3.5, 3.5, 4.2, 3.3, 3.3, 4.1, 3.6, 3.6, 4.3, 3.4, 3.7, 3.1, 4.1, 4.2, 3.2, 3.8, 3.7, 3.6, 4.0, 3.6, 2.8, 4.6, 2.3, 3.8, 3.8, 4.3, 3.9, 2.9, 4.3, 4.3, 4.1, 3.8, 4.4, 2.8, 2.5, 3.2, 3.1, 3.7, 3.8, 3.8, 3.9, 3.5, 3.8, 4.4, 3.4, 3.5, 3.9, 3.5, 3.8, 2.8, 2.8, 4.1, 3.7, 3.5, 3.5, 4.0, 3.8, 2.7, 3.8, 2.9, 3.8, 4.5, 3.2, 3.1, 3.6, 4.0, 3.6, 3.8, 2.5, 4.3, 3.5, 4.1, 4.0, 3.5, 4.3, 3.7, 3.5, 3.3, 3.7, 3.4, 3.5, 3.6, 3.9, 3.6, 4.1, 3.9, 3.6, 4.1, 4.4, 4.1, 4.0, 3.8, 3.4, 4.0, 3.8, 4.2, 3.1, 3.1, 3.1, 4.2, 4.4, 3.4, 3.8, 3.1, 4.4, 3.5, 4.1, 3.1, 4.1, 3.9, 3.6, 3.9, 3.0, 3.4, 4.2, 4.3, 4.1, 3.8, 4.0, 4.1, 3.8, 3.8, 3.7, 4.0, 3.2, 4.3, 4.4, 3.5, 4.2, 3.7, 3.3, 4.1, 3.6, 4.3, 3.4, 3.6, 4.0, 3.7, 3.4, 3.2, 3.7, 4.0, 3.8, 4.0, 4.0, 3.5, 3.6, 3.7, 3.4, 3.1, 3.8, 3.8, 3.1, 3.6, 3.1, 3.9, 4.2, 4.1, 3.3, 4.6, 3.2, 3.8, 3.1, 3.6, 3.2, 4.6, 3.3, 3.6, 3.7, 3.7, 4.1, 3.4, 4.0, 3.1, 3.9, 4.4, 3.7, 3.8, 3.9, 3.6, 3.9, 3.9, 3.8, 3.7, 3.1, 3.7, 3.6, 3.7, 3.3, 3.8, 3.3, 4.1, 3.6, 3.8, 3.4, 4.0, 3.9, 3.7, 3.6, 3.1, 3.1, 3.2, 3.7, 4.0, 4.0, 4.4, 4.4, 2.9, 3.8, 3.7, 3.4, 4.4, 3.8, 3.6, 3.5, 3.0, 3.6, 3.8, 3.9, 3.1, 4.3, 4.1, 4.1, 3.6, 4.2, 3.9, 3.2, 3.5, 4.1, 3.9, 3.3, 3.6, 3.4, 3.8, 3.1, 3.1, 3.0, 3.8, 3.8, 2.9, 3.6, 2.7, 3.1, 4.1, 3.5, 4.1, 3.4, 4.8, 3.9, 3.3, 3.8, 3.7, 3.5, 3.6, 3.1, 4.0, 3.3, 2.8, 3.3, 3.9, 4.4, 3.1, 3.2, 3.9, 3.6, 3.5, 3.9, 2.4, 3.7, 3.3, 3.7, 3.9, 4.0, 4.4, 3.6, 3.5, 3.2, 3.8, 4.5, 3.3, 4.0, 3.4, 3.2, 4.1, 4.1, 3.3, 3.0, 3.9, 4.2, 3.7, 3.9, 3.7, 3.3, 3.6, 3.3, 4.4, 3.8, 3.8, 3.7, 4.3, 4.0, 4.4, 3.8, 4.0, 4.2, 4.0, 4.2, 3.6, 2.7, 3.6, 3.8, 4.1, 3.8, 3.3, 2.8, 2.7, 4.0, 3.6, 3.4, 3.5, 4.0, 3.4, 3.4, 3.9, 2.9, 4.0, 4.1, 3.9, 3.1, 3.1, 4.3, 3.9, 4.0, 3.8, 3.2, 3.3, 3.1, 4.0, 4.5, 4.1, 3.5, 3.2, 4.2, 3.9, 3.5, 4.1, 3.6, 3.8, 2.5, 3.9, 4.6, 3.8, 3.5, 4.4, 3.5, 4.1, 3.5, 3.8, 2.7, 3.6, 4.0, 3.5, 4.0, 2.8, 3.9, 3.5, 4.1, 3.7, 3.3, 4.0, 3.8, 3.3, 4.2, 3.1, 3.1, 3.6, 3.7, 2.9, 4.3, 3.2, 3.2, 3.6, 4.5, 3.0, 2.6, 3.2, 3.4, 3.7, 3.6, 4.9, 3.9, 3.8, 3.8, 4.3, 4.0, 3.4, 3.9, 3.5, 2.7, 2.9, 4.2, 4.1, 3.9, 2.7, 3.1, 2.6, 3.2, 2.9, 3.1, 3.3, 3.2, 3.3, 4.2, 4.0, 3.1, 3.1, 4.2, 4.0, 3.5, 4.3, 3.9, 2.8, 3.6, 3.7, 3.8, 3.5, 3.8, 3.8, 3.7, 4.1, 3.8, 3.4, 4.4, 3.7, 4.4, 3.7, 4.6, 4.2, 3.3, 2.2, 3.1, 3.8, 3.9, 3.7, 3.0, 3.5, 3.6, 4.4, 4.0, 3.6, 4.2, 3.9, 2.9, 4.0, 3.3, 3.9, 3.6, 3.9, 4.1, 3.3, 3.0, 3.2, 3.3, 3.2, 3.8, 4.0, 3.6, 3.9, 4.6, 2.9, 4.6, 3.2, 3.7, 3.9, 4.1, 4.4, 3.6, 3.6, 3.6, 3.7, 3.7, 3.7, 3.7, 3.5, 4.0, 4.2, 4.0, 3.1, 3.9, 2.8, 3.0, 3.9, 2.9, 4.2, 3.5, 4.2, 3.3, 4.1, 3.2, 3.4, 3.7, 3.0, 4.3, 3.7, 3.8, 4.4, 3.7, 4.0, 3.3, 3.2, 4.0, 3.8, 3.1, 3.8, 3.2, 3.6, 3.5, 3.5, 3.9, 3.7, 3.9, 3.6, 3.7, 4.1, 4.2, 3.1, 3.8, 3.6, 3.3, 2.9, 4.2, 3.6, 3.2, 3.7, 4.0, 4.2, 4.4, 4.6, 3.9, 3.3, 3.5, 3.6, 3.8, 3.8, 4.2, 4.2, 3.9, 4.0, 3.8, 3.3, 3.8, 4.1, 4.4, 4.3, 3.9, 3.9, 3.9, 3.9, 3.8, 3.6, 3.3, 3.6, 4.1, 3.1, 4.1, 3.5, 3.9, 3.9, 3.7, 4.5, 3.3, 2.8, 3.9, 3.6, 3.4, 3.2, 4.2, 3.4, 4.1, 3.8, 3.8, 3.3, 3.1, 3.6, 3.8, 4.3, 3.5, 4.2, 4.2, 3.1, 4.2, 3.1, 4.4, 3.5, 3.9, 3.9, 3.0, 4.3, 3.9, 3.8, 3.0, 4.6, 3.9, 3.8, 2.9, 3.2, 3.7, 3.7, 4.0, 3.8, 3.5, 3.7, 4.4, 4.0, 3.9, 4.4, 3.2, 3.8, 4.2, 3.3, 3.9, 4.1, 4.1, 3.7, 3.3, 3.8, 3.9, 4.1, 3.5, 3.6, 3.9, 3.1, 3.8, 3.8, 3.1, 4.8, 3.0, 3.4, 3.3, 3.3, 4.2, 3.1, 4.0, 4.5, 3.4, 3.9, 3.5, 3.3, 4.4, 3.7, 3.8, 4.6, 4.2, 2.9, 3.4, 3.7, 3.1, 3.7, 3.9, 3.2, 4.5, 3.6, 3.5, 3.9, 3.1, 3.3, 4.0, 4.0, 4.4, 3.3, 3.8, 3.8, 4.1, 3.4, 4.1, 3.1, 3.7, 3.6, 3.5, 3.8, 4.2, 3.4, 3.5, 4.2, 3.9, 4.5, 3.6, 3.9, 3.7, 3.0, 3.4, 3.5, 3.9, 3.1, 3.7, 3.6, 3.0, 3.7, 4.3, 3.0, 3.1, 3.8, 4.2, 4.0, 3.7, 3.9, 3.5, 3.6, 3.7, 2.9, 4.6, 4.2, 2.8, 3.3, 3.5, 3.5, 3.6, 3.6, 4.3, 3.9, 3.5, 3.2, 3.4, 4.0, 3.3, 4.3, 4.5, 4.0, 3.4, 4.2, 3.7, 3.7, 4.3, 4.2, 4.1, 4.0, 3.9, 3.8, 4.0, 3.8, 3.6, 3.4, 3.8, 4.3, 4.3, 3.8, 3.5, 3.5, 3.3, 2.8, 4.2, 3.8, 3.7, 4.1, 3.6, 4.2, 3.6, 3.7, 2.3, 3.9, 3.5, 3.7, 3.9, 3.8, 3.8, 3.5, 3.7, 4.5, 3.3, 3.3, 4.2, 3.9, 3.4, 3.1, 3.8, 3.7, 4.3, 3.6, 4.0, 3.0, 4.0, 3.8, 3.0, 4.3, 3.2, 3.3, 3.4, 4.0, 3.7, 3.9, 3.9, 3.5, 3.4, 4.2, 3.7, 4.1, 3.6, 4.1, 3.0, 3.1, 3.4, 4.2, 3.1, 3.6, 4.1, 4.0, 3.3, 3.9, 4.2, 2.9, 3.1, 4.2, 4.2, 4.1, 3.2, 4.0, 3.2, 3.7, 3.4, 3.2, 4.1, 3.8, 4.0, 3.1, 4.0, 3.2, 2.7, 3.6, 3.6, 4.3, 2.9, 3.4, 3.8, 3.4, 4.1, 4.0, 3.4, 3.9, 4.6, 3.5, 3.1, 2.8, 4.2, 3.5, 3.3, 3.5, 4.1, 3.4, 4.0, 3.8, 4.4, 2.8, 3.8, 3.2, 3.3, 4.5, 3.9, 4.1, 3.3, 3.4, 3.9, 3.8, 4.0, 2.8, 3.8, 3.9, 3.5, 2.6, 3.6, 3.6, 3.9, 2.9, 3.7, 3.1, 4.0, 3.0, 3.8, 3.4, 2.3, 3.9, 3.7, 4.1, 3.5, 3.6, 4.1, 4.1, 3.4, 3.7, 3.9, 3.9, 3.5, 4.3, 3.4, 4.2, 4.1, 3.8, 4.1, 3.2, 3.7, 3.6, 3.4, 4.1, 3.2, 2.7, 3.9, 3.8, 4.0, 3.3, 3.7, 3.7, 4.0, 3.9, 4.0, 3.9, 3.9, 2.9, 3.2, 4.1, 4.2, 4.2, 3.3, 3.5, 3.6, 3.5, 3.8, 3.7, 4.7, 3.9, 3.5, 3.6, 3.7, 3.9, 3.5, 3.8, 3.0, 3.9, 3.4, 3.7, 3.7, 3.7, 3.8, 4.3, 3.9, 3.1, 4.0, 3.1, 4.5, 2.9, 4.5, 4.2, 3.4, 4.1, 3.3, 3.4, 3.5, 3.8, 4.7, 3.3, 3.2, 3.0, 3.6, 2.3, 3.2, 3.3, 3.3, 4.3, 2.9, 4.3, 3.6, 3.9, 3.4, 3.8, 4.1, 3.3, 3.9, 4.2, 4.0, 3.3, 3.5, 3.2, 4.2, 2.9, 3.6, 4.2, 3.5, 3.8, 4.0, 3.1, 3.9, 3.7, 3.6, 3.3, 2.7, 4.0, 3.4, 3.8, 2.9, 4.1, 3.8, 4.4, 3.8, 3.9, 4.1, 3.7, 4.2, 3.9, 3.3, 3.9, 3.6, 3.2, 3.8, 3.8, 3.7, 3.6, 3.5, 3.0, 2.9, 4.4, 3.1, 3.0, 4.2, 3.7, 3.0, 2.9, 2.7, 4.4, 2.8, 4.7, 3.4, 4.5, 3.8, 2.2, 2.7, 4.0, 4.0, 3.0, 3.7, 3.2, 4.1, 3.4, 3.5, 3.6, 4.4, 3.3, 4.1, 4.0, 4.3, 3.2, 4.1, 3.5, 4.2, 4.0, 3.4, 4.1, 2.7, 3.2, 3.6, 4.2, 3.6, 4.1, 3.5, 3.1, 3.6, 3.8, 4.2, 4.3, 3.8, 3.3, 3.8, 3.6, 4.0, 3.9, 3.6, 3.7, 3.6, 3.7, 3.7, 3.1, 3.6, 4.0, 3.6, 3.7, 3.8, 3.8, 3.6, 3.8, 2.5, 3.6, 4.1, 3.3, 3.3, 3.8, 3.8, 3.6, 4.2, 3.3, 3.0, 3.7, 3.0, 4.0, 3.2, 3.6, 4.4, 4.0, 4.1, 3.5, 4.0, 3.8, 4.1, 4.1, 3.8, 4.2, 3.8, 3.5, 3.8, 3.4, 3.9, 4.3, 3.7, 3.0, 3.3, 4.4, 3.2, 4.0, 3.6, 3.8, 4.0, 4.2, 3.6, 3.7, 4.0, 3.5, 3.8, 4.3, 3.6, 3.6, 4.1, 4.3, 4.2, 4.0, 4.1, 3.4, 3.7, 3.9, 3.6, 3.8, 3.5, 4.1, 4.4, 3.7, 3.9, 3.4, 3.1, 3.7, 3.9, 3.5, 3.5, 4.3, 4.3, 4.0, 4.3, 4.4, 4.0, 3.3, 4.4, 3.8, 4.0, 4.1, 4.3, 3.6, 2.8, 4.4, 3.7, 4.1, 3.3, 3.9, 4.1, 3.7, 3.7, 3.8, 4.3, 4.1, 3.1, 3.8, 3.7, 3.7, 4.6, 3.3, 3.7, 3.8, 4.3, 3.5, 3.8, 3.3, 3.4, 3.5, 3.4, 3.7, 3.3, 3.8, 3.4, 4.0, 3.7, 3.6, 3.7, 3.5, 3.8, 4.0, 3.1, 3.7, 3.2, 3.1, 4.0, 3.9, 4.3, 4.5, 3.8, 3.8, 4.2, 3.6, 3.9, 3.6, 3.8, 3.8, 3.9, 3.8, 4.1, 3.6, 3.8, 4.1, 3.6, 4.0, 3.3, 4.0, 3.2, 4.3, 2.9, 4.4, 3.4, 3.7, 3.8, 4.1, 3.3, 3.5, 3.9, 3.8, 4.1, 3.7, 4.3, 4.3, 4.2, 3.6, 4.4, 3.5, 4.0, 4.5, 2.8, 3.2, 4.0, 4.6, 4.3, 4.0, 4.1, 4.0, 4.0, 3.7, 3.7, 3.5, 3.0, 3.0, 3.6, 4.1, 3.9, 3.8, 3.8, 3.9, 3.8, 3.5, 4.4, 3.0, 3.6, 4.1, 4.2, 2.9, 3.7, 4.2, 3.7, 3.4, 3.8, 3.8, 3.4, 3.9, 3.3, 3.2, 3.5, 4.3, 4.3, 3.9, 2.8, 3.5, 4.1, 4.6, 3.7, 4.0, 3.3, 4.6, 4.4, 3.4, 4.1, 3.5, 4.3, 4.2, 4.1, 2.7, 4.4, 2.9, 4.5, 4.4, 3.9, 3.4, 3.8, 4.3, 3.9, 4.3, 3.6, 3.6, 3.9, 4.4, 3.5, 4.0, 3.2, 4.5, 3.1, 3.8, 3.6, 3.6, 4.0, 4.0, 3.6, 3.6, 3.8, 2.9, 3.7, 3.2, 3.7, 3.2, 4.3, 3.4, 3.7, 3.1, 4.2, 4.4, 4.0, 3.2, 3.2, 3.6, 3.6, 3.7, 3.8, 3.7, 4.2, 3.6, 3.3, 4.0, 3.9, 4.0, 4.0, 4.2, 3.1, 3.4, 3.8, 4.1, 3.9, 4.4, 3.0, 4.0, 4.3, 3.9, 3.9, 4.1, 3.4, 3.8, 3.2, 3.6, 3.5, 3.0, 3.4, 4.2, 3.0, 3.3, 3.9, 3.8, 4.3, 2.9, 3.6, 4.2, 3.5, 4.1, 3.5, 3.6, 3.7, 3.7, 3.7, 2.6, 4.4, 3.4, 3.4, 4.3, 3.5, 3.9, 3.6, 3.6, 4.2, 3.4, 4.1, 3.5, 3.7, 4.2, 3.3, 3.4, 4.6, 4.1, 4.0, 4.0, 3.9, 3.5, 3.7, 4.1, 3.2, 4.2, 4.7, 3.7, 3.9, 3.6, 4.0, 3.4, 4.5, 3.7, 3.7, 3.7, 4.0, 3.2, 4.3, 4.1, 3.7, 4.1, 3.7, 4.4, 4.4, 4.9, 4.1, 3.0, 2.4, 3.1, 4.4, 3.5, 3.0, 3.4, 4.0, 3.7, 4.5, 4.4, 3.3, 3.5, 3.6, 4.2, 4.0, 4.3, 2.7, 4.0, 3.3, 3.7, 4.1, 3.7, 3.8, 4.1, 4.3, 4.2, 3.6, 3.1, 3.3, 3.9, 3.4, 3.4, 3.3, 3.8, 3.2, 4.1, 4.1, 4.0, 3.6, 3.3, 4.0, 3.1, 4.3, 3.8, 4.5, 4.2, 3.8, 3.5, 2.6, 3.2, 3.9, 3.8, 4.3, 3.6, 3.3, 3.5, 4.1, 3.7, 3.8, 3.8, 3.7, 3.8, 2.9, 4.1, 4.1, 3.7, 4.2, 4.1, 3.4, 3.1, 4.2, 3.0, 3.9, 4.2, 3.8, 2.9, 3.8, 3.7, 4.0, 3.9, 3.3, 3.2, 3.7, 3.8, 4.2, 3.1, 4.1, 4.0, 4.1, 3.2, 3.7, 3.0, 3.8, 3.6, 3.5, 3.4, 4.4, 3.8, 3.8, 3.5, 3.5, 4.9, 3.2, 3.9, 3.7, 4.3, 3.7, 2.9, 3.4, 3.3, 4.1, 3.8, 3.4, 3.6, 3.2, 3.1, 3.8, 3.8, 4.3, 3.6, 3.6, 3.4, 4.7, 3.3, 4.1, 3.6, 4.1, 3.5, 4.0, 4.4, 3.1, 3.5, 4.3, 3.7, 3.2, 3.1, 4.1, 3.9, 3.8, 3.8, 3.6, 3.6, 4.1, 4.2, 4.1, 3.3, 3.2, 4.7, 3.6, 4.3, 4.2, 4.1, 3.3, 3.2, 2.9, 3.7, 4.1, 3.6, 3.8, 3.1, 3.4, 3.5, 3.9, 2.9, 4.3, 4.1, 3.0, 3.6, 4.0, 3.7, 2.6, 3.2, 3.8, 4.2, 3.4, 3.4, 4.4, 3.6, 3.8, 3.2, 3.7, 4.2, 4.1, 3.2, 3.3, 4.4, 3.7, 3.5, 3.9, 3.2, 3.9, 3.4, 3.7, 4.0, 3.7, 4.2, 3.5, 2.8, 3.8, 3.2, 4.0, 4.2, 3.9, 4.3, 4.0, 4.5, 3.7, 3.5, 4.1, 3.9, 3.7, 3.9, 3.4, 3.7, 3.9, 3.9, 3.8, 3.9, 3.7, 3.4, 3.8, 3.2, 3.7, 3.3, 3.8, 4.0, 3.3, 3.8, 3.6, 3.8, 4.0, 3.9, 3.4, 4.1, 4.5, 3.8, 3.6, 3.8, 4.1, 3.5, 3.1, 3.3, 3.7, 3.5, 4.0, 3.8, 3.3, 3.9, 3.3, 3.8, 3.9, 4.2, 3.2, 3.4, 4.3, 2.6, 4.0, 2.8, 3.8, 3.9, 3.4, 3.7, 4.1, 3.7, 4.4, 3.9, 3.2, 3.9, 4.3, 3.2, 4.3, 3.7, 3.4, 3.0, 3.8, 3.7, 3.6, 3.5, 3.6, 4.1, 4.2, 4.3, 3.8, 3.9, 4.7, 4.3, 3.0, 4.4, 3.9, 3.3, 4.2, 4.0, 3.4, 3.4, 3.6, 3.1, 3.4, 2.9, 4.5, 4.2, 4.2, 4.5, 4.5, 3.0, 3.3, 3.7, 3.8, 3.3, 2.8, 3.7, 3.9, 3.6, 4.2, 4.1, 3.4, 2.9, 3.6, 3.1, 3.8, 3.3, 3.9, 3.7, 4.0, 3.5, 4.2, 3.9, 3.4, 3.8, 3.9, 3.7, 4.0, 4.7, 3.6, 3.8, 3.9, 4.2, 3.2, 3.3, 3.7, 3.5, 3.2, 3.9, 3.3, 3.5, 3.9, 3.9, 4.4, 4.3, 4.2, 3.7, 3.5, 3.2, 3.9, 2.8, 3.2, 3.9, 4.0, 3.1, 3.8, 3.7, 4.5, 3.8, 3.7, 3.8, 3.5, 3.8, 4.1, 3.1, 3.7, 3.7, 3.7, 3.7, 3.1, 4.1, 3.5, 4.0, 3.6, 3.3, 2.9, 3.4, 4.2, 3.4, 4.3, 3.6, 4.3, 4.0, 3.7, 2.9, 3.8, 3.2, 3.6, 3.9, 3.9, 3.6, 3.6, 3.7, 3.6, 3.1, 4.0, 3.7, 3.4, 4.0, 4.0, 4.2, 4.0, 4.1, 3.2, 4.3, 3.4, 4.2, 3.3, 3.6, 3.8, 3.1, 3.5, 3.6, 4.0, 3.7, 3.3, 3.4, 3.3, 4.3, 3.4, 3.4, 3.6, 3.4, 3.5, 3.4, 3.6, 3.7, 4.0, 4.1, 3.2, 3.2, 3.0, 3.8, 3.4, 3.8, 3.9, 3.2, 3.4, 4.2, 4.0, 3.6, 4.3, 4.0, 3.7, 4.2, 3.4, 3.4, 3.2, 3.7, 4.3, 3.7, 3.8, 4.3, 4.0, 3.0, 3.5, 3.1, 3.5, 3.2, 4.3, 3.3, 3.8, 3.6, 3.7, 3.2, 3.6, 3.6, 3.4, 4.3, 4.4, 3.9, 3.3, 3.0, 3.0, 4.1, 3.4, 3.3, 4.0, 3.6, 3.8, 3.6, 3.6, 4.3, 3.5, 4.4, 3.2, 3.7, 4.0, 3.8, 3.8, 3.5, 3.6, 3.6, 4.3, 3.7, 3.6, 3.9, 4.0, 4.2, 3.7, 3.9, 3.1, 4.3, 3.2, 4.0, 2.6, 4.6, 3.2, 3.4, 3.6, 3.3, 3.9, 3.8, 3.3, 3.4, 3.0, 4.4, 3.4, 3.7, 4.3, 3.8, 4.6, 3.1, 4.4, 3.2, 4.3, 4.9, 3.7, 3.0, 3.7, 3.1, 2.9, 3.8, 3.3, 3.9, 4.0, 3.8, 3.6, 3.5, 3.7, 3.5, 3.6, 3.2, 3.7, 3.3, 3.5, 4.0, 3.9, 3.2, 4.2, 3.9, 3.5, 4.4, 3.1, 3.3, 2.6, 3.9, 3.6, 4.0, 3.3, 3.9, 3.9, 3.9, 4.3, 3.1, 4.0, 3.1, 3.1, 3.6, 3.2, 3.9, 3.3, 2.9, 3.8, 3.2, 3.3, 4.1, 3.8, 3.2, 3.9, 3.9, 3.4, 4.0, 3.9, 4.0, 3.9, 4.1, 3.9, 2.9, 3.1, 4.7, 3.0, 2.8, 3.1, 3.9, 3.3, 3.5, 4.3, 4.3, 3.3, 4.4, 4.3, 3.9, 3.1, 3.4, 3.5, 3.7, 3.5, 3.1, 3.9, 4.0, 3.6, 3.7, 3.3, 3.1, 4.6, 3.8, 3.8, 3.3, 4.2, 4.5, 3.6, 3.2, 3.7, 3.2, 4.1, 4.5, 3.2, 3.3, 4.1, 3.6, 3.5, 4.3, 4.1, 2.8, 4.7, 4.2, 3.2, 4.1, 3.8, 4.0, 3.9, 4.3, 2.7, 3.3, 4.2, 3.4, 3.9, 3.7, 4.5, 3.5, 4.4, 4.2, 3.5, 4.0, 3.7, 3.7, 3.6, 3.7, 3.5, 3.9, 3.6, 3.7, 3.9, 4.0, 3.4, 3.9, 3.6, 4.0, 3.9, 4.0, 3.8, 4.5, 3.7, 4.1, 3.5, 3.9, 3.1, 3.8, 3.9, 3.3, 3.5, 4.0, 3.7, 4.2, 3.9, 3.3, 3.4, 3.9, 3.7, 3.9, 3.6, 3.8, 3.9, 3.9, 4.3, 3.3, 3.8, 3.9, 3.4, 3.8, 3.5, 3.0, 3.6, 4.1, 3.3, 4.9, 4.0, 3.7, 3.7, 4.4, 4.2, 3.4, 4.5, 3.3, 4.4, 3.6, 3.0, 3.7, 3.3, 4.6, 3.8, 3.8, 3.7, 3.5, 4.0, 4.4, 2.9, 3.8, 3.5, 3.9, 4.2, 3.5, 3.9, 3.0, 4.2, 4.0, 3.8, 2.7, 4.0, 3.7, 3.8, 3.3, 4.2, 3.3, 4.3, 3.8, 3.2, 3.3, 3.1, 3.3, 3.6, 3.9, 2.9, 3.2, 3.2, 3.2, 2.7, 4.1, 3.6, 4.3, 3.9, 3.8, 3.0, 4.0, 3.7, 3.2, 4.1, 4.1, 3.5, 3.3, 3.9, 3.2, 3.2, 3.5, 3.9, 3.6, 3.7, 3.7, 2.5, 2.8, 3.8, 3.9, 2.9, 4.0, 3.1, 4.2, 3.8, 3.2, 3.4, 3.9, 3.3, 3.3, 4.3, 3.8, 3.8, 3.7, 4.4, 4.3, 3.6, 4.2, 4.3, 4.1, 4.3, 4.3, 3.9, 3.7, 3.7, 3.7, 3.4, 4.0, 3.6, 3.3, 3.0, 4.1, 3.7, 3.5, 4.4, 3.9, 3.1, 4.2, 3.9, 4.2, 3.6, 3.9, 3.4, 3.9, 3.8, 4.1, 3.2, 4.2, 4.4, 3.4, 3.9, 3.6, 4.3, 4.0, 4.2, 4.2, 4.2, 3.9, 4.2, 4.1, 3.2, 2.7, 3.7, 3.9, 3.6, 3.4, 3.6, 2.6, 3.6, 3.8, 3.8, 3.4, 3.9, 2.6, 3.9, 4.2, 4.0, 2.8, 4.2, 4.2, 3.4, 2.9, 3.7, 4.2, 4.2, 3.1, 4.3, 3.8, 4.1, 4.3, 3.5, 4.0, 4.0, 3.7, 4.1, 2.0, 4.5, 3.8, 3.8, 3.6, 4.4, 2.6, 3.8, 4.1, 3.1, 3.7, 3.2, 3.6, 4.0, 4.1, 4.7, 3.9, 4.5, 2.7, 3.9, 3.2, 4.6, 3.8, 4.1, 4.3, 3.9, 3.2, 3.8, 3.3, 4.2, 4.0, 2.9, 3.7, 3.5, 3.7, 4.3, 3.3, 3.4, 3.6, 4.1, 4.3, 4.1, 2.9, 4.1, 3.9, 2.8, 3.7, 4.6, 3.9, 4.0, 4.0, 4.1, 4.0, 4.4, 3.7, 4.4, 3.3, 3.4, 4.1, 3.1, 3.4, 2.9, 4.1, 4.1, 3.7, 3.6, 4.1, 3.9, 3.2, 4.2, 3.3, 3.7, 3.6, 3.3, 4.2, 3.7, 3.9, 4.1, 3.6, 4.5, 3.9, 3.3, 3.9, 4.1, 3.6, 3.5, 3.6, 3.0, 2.9, 3.9, 4.4, 4.5, 3.9, 3.1, 3.9, 3.0, 2.9, 4.1, 3.7, 3.7, 2.3, 4.4, 4.1, 4.0, 3.9, 4.4, 3.8, 3.8, 3.7, 3.4, 3.6, 3.8, 4.1, 3.6, 3.9, 3.0, 3.9, 3.2, 2.8, 3.6, 4.3, 3.2, 3.9, 3.5, 3.8, 3.4, 4.3, 3.5, 3.1, 3.4, 4.2, 3.7, 3.6, 3.9, 3.6, 4.1, 3.4, 3.6, 3.1, 3.5, 3.8, 4.1, 3.1, 3.3, 4.0, 4.5, 3.3, 3.6, 3.5, 4.2, 3.6, 3.4, 2.7, 3.6, 3.6, 3.4, 4.2, 2.9, 3.3, 3.5, 3.8, 3.9, 3.4, 3.6, 4.5, 4.0, 3.7, 4.4, 3.9, 2.5, 3.6, 3.3, 2.8, 4.1, 3.6, 4.1, 4.0, 4.0, 3.9, 3.3, 3.8, 3.4, 3.5, 3.4, 4.2, 3.7, 4.0, 3.1, 3.4, 3.3, 3.5, 3.2, 3.3, 4.1, 3.9, 3.9, 3.1, 4.1, 3.9, 3.5, 3.6, 4.2, 3.4, 3.7, 2.8, 4.6, 3.2, 4.3, 4.1, 3.5, 3.5, 3.3, 3.0, 4.1, 3.6, 3.7, 3.1, 3.5, 3.6, 3.9, 3.3, 3.8, 3.1, 3.1, 3.3, 3.7, 3.6, 3.6, 3.1, 4.2, 2.7, 3.8, 4.0, 3.2, 3.0, 4.2, 3.8, 4.0, 3.1, 3.6, 3.4, 4.3, 4.0, 3.7, 3.2, 2.9, 3.7, 3.8, 3.1, 3.5, 4.1, 3.8, 3.3, 3.7, 3.5, 2.7, 2.9, 4.0, 2.6, 3.6, 2.6, 4.2, 3.1, 3.5, 3.8, 3.7, 3.9, 3.8, 2.8, 3.7, 4.3, 4.3, 4.1, 3.3, 3.7, 4.2, 3.2, 4.1, 3.8, 4.3, 3.8, 4.0, 4.1, 4.2, 4.1, 2.8, 3.7, 3.3, 3.5, 3.8, 3.6, 3.6, 2.8, 4.1, 3.6, 3.8, 4.0, 4.2, 2.9, 4.2, 3.1, 4.0, 4.1, 3.4, 3.9, 2.7, 3.8, 3.7, 4.4, 3.8, 3.9, 3.6, 3.9, 4.1, 3.9, 4.0, 3.5, 4.2, 3.4, 2.9, 4.4, 4.7, 4.0, 3.8, 4.3, 3.1, 3.2, 3.8, 4.3, 3.7, 2.9, 3.5, 4.4, 4.2, 3.2, 3.7, 4.4, 2.9, 3.4, 4.4, 3.4, 3.9, 4.3, 3.9, 3.5, 4.4, 3.6, 3.1, 4.1, 4.0, 3.9, 4.3, 4.2, 3.4, 4.3, 3.6, 3.8, 3.5, 3.6, 3.3, 3.6, 3.8, 3.4, 3.1, 3.8, 3.7, 3.3, 4.2, 3.7, 4.3, 3.4, 3.4, 4.0, 3.6, 4.6, 4.1, 3.7, 3.7, 3.2, 3.9, 3.8, 3.7, 4.4, 3.3, 3.7, 3.6, 4.1, 3.7, 3.3, 3.9, 4.1, 4.1, 4.1, 3.6, 4.1, 4.3, 4.0, 4.5, 3.5, 3.6, 2.9, 3.9, 2.7, 3.6, 4.2, 3.9, 2.9, 3.1, 3.5, 3.1, 3.5, 3.3, 4.0, 3.4, 4.1, 3.6, 3.1, 3.7, 3.4, 3.2, 3.0, 3.2, 3.6, 4.3, 3.8, 3.1, 3.5, 3.2, 3.8, 3.7, 4.2, 3.9, 3.8, 3.6, 2.8, 4.0, 3.1, 3.7, 3.0, 4.1, 3.8, 3.6, 3.2, 3.9, 4.5, 4.2, 3.7, 3.6, 3.1, 3.8, 3.9, 3.2, 4.1, 2.5, 4.2, 2.6, 3.5, 3.1, 3.7, 3.1, 2.8, 3.7, 4.0, 2.8, 3.7, 4.4, 3.3, 4.4, 2.9, 3.5, 3.7, 4.3, 3.6, 3.4, 4.1, 3.9, 3.8, 4.0, 3.3, 3.8, 4.1, 3.7, 4.1, 3.5, 3.7, 4.0, 4.2, 3.5, 4.1, 4.1, 4.9, 4.1, 3.9, 3.6, 3.7, 3.7, 3.8, 4.3, 3.6, 2.6, 3.8, 3.0, 3.4, 3.5, 4.5, 3.5, 4.3, 3.8, 4.0, 3.1, 2.6, 3.6, 3.0, 4.2, 3.5, 3.1, 3.5, 3.3, 4.1, 3.3, 3.8, 3.3, 3.5, 4.3, 3.6, 3.7, 4.0, 3.5, 3.2, 3.6, 3.7, 3.6, 4.2, 3.6, 3.7, 3.9, 3.5, 3.3, 3.6, 4.2, 2.9, 3.7, 3.1, 3.8, 3.2, 3.6, 4.4, 3.6, 4.0, 3.6, 3.3, 3.2, 4.4, 3.2, 3.4, 3.7, 3.5, 3.0, 4.2, 4.0, 3.3, 4.2, 3.0, 4.0, 4.0, 3.8, 4.1, 3.7, 3.3, 3.3, 3.6, 3.6, 3.9, 2.8, 3.1, 3.9, 3.3, 4.2, 4.5, 3.6, 3.5, 3.4, 2.3, 4.0, 3.1, 3.5, 4.0, 4.3, 4.4, 3.0, 3.8, 4.2, 3.9, 4.4, 3.5, 3.3, 4.0, 4.1, 3.9, 4.3, 4.1, 3.6] ;
+    Plotly.newPlot("plot-cost-vs-rating", [{
+      type: "scatter",
+      mode: "markers",
+      x: cost,
+      y: rating,
+      marker: { size: 8, color: "#cb202d" }
+    }], {
+      xaxis: {title: "Approx cost for two"},
+      yaxis: {title: "Rating"}
+    }, {displayModeBar: false});
+  })();
+
+  // 5) Votes vs rating
+  (function() {
+    var votes  = [1265, 4, 21, 498, 23, 40, 28, 211, 103, 100, 5, 58, 1576, 25, 63, 63, 13, 18, 440, 49, 1745, 1193, 32, 33, 174, 23, 218, 101, 24, 17, 177, 2254, 263, 9, 39, 78, 6, 1808, 1913, 1079, 538, 6, 121, 33, 13, 153, 1380, 590, 34, 57, 217, 8, 491, 40, 23, 54, 163, 16, 43, 354, 27, 18, 25, 4, 22, 245, 4, 44, 14, 312, 10, 185, 11, 208, 7, 22, 2053, 128, 13, 23, 2578, 500, 13, 558, 184, 117, 30, 783, 231, 21, 5, 164, 121, 292, 1543, 186, 190, 55, 12, 1140, 107, 41, 23, 190, 470, 47, 1204, 225, 2189, 461, 17, 130, 209, 366, 207, 25, 5, 17, 816, 25, 125, 4644, 1912, 1514, 118, 259, 117, 2055, 388, 5, 7, 441, 14, 14, 63, 5, 2496, 5, 38, 4, 162, 7, 20, 60, 115, 1408, 344, 10, 363, 70, 501, 3823, 2993, 6, 87, 650, 286, 23, 20, 43, 25, 17, 739, 4, 45, 111, 8, 13, 61, 309, 37, 86, 15, 6, 4, 3156, 324, 39, 533, 50, 377, 47, 73, 12, 17, 53, 12, 390, 160, 40, 8, 24, 36, 331, 68, 1079, 8, 157, 11, 154, 454, 1558, 105, 30, 25, 15, 50, 1273, 1195, 23, 6, 2229, 13, 19, 7, 40, 17, 67, 4, 5, 11, 27, 722, 34, 1191, 337, 6, 405, 189, 57, 870, 2054, 395, 327, 41, 180, 77, 4, 48, 4442, 7, 62, 120, 84, 474, 63, 10, 28, 213, 5, 23, 44, 405, 85, 148, 277, 82, 28, 76, 949, 21, 62, 60, 53, 53, 15, 323, 5, 28, 16, 78, 15, 23, 33, 1390, 4, 281, 105, 38, 186, 32, 6, 601, 58, 48, 169, 8, 399, 38, 4, 20, 30, 17, 21, 167, 133, 3227, 49, 11, 506, 91, 77, 907, 138, 224, 9, 115, 29, 12, 854, 362, 27, 493, 89, 397, 7, 718, 864, 19, 16, 23, 211, 96, 59, 277, 433, 463, 67, 62, 26, 409, 71, 432, 17, 4, 21, 37, 5, 4, 6, 55, 227, 232, 440, 354, 8, 23, 7, 60, 24, 130, 61, 283, 45, 41, 7, 730, 353, 58, 52, 482, 29, 456, 269, 9, 194, 7, 4, 1878, 9, 42, 10, 1244, 10, 457, 12, 17, 1260, 465, 1534, 317, 166, 21, 20, 23, 450, 322, 26, 723, 67, 16, 59, 864, 444, 34, 28, 1964, 106, 332, 1626, 43, 9, 13, 4, 104, 168, 42, 115, 252, 5746, 37, 1413, 11, 102, 75, 3115, 5, 118, 31, 29, 1124, 9, 1214, 45, 141, 728, 19, 8, 4, 257, 26, 165, 382, 428, 327, 232, 494, 22, 16, 65, 205, 167, 96, 5, 18, 14, 22, 33, 5, 374, 43, 6998, 986, 137, 61, 355, 176, 446, 18, 101, 1534, 4, 222, 57, 6, 30, 14, 539, 614, 41, 274, 51, 617, 22, 19, 409, 29, 41, 122, 283, 16, 255, 138, 614, 8, 106, 44, 1207, 20, 191, 326, 45, 132, 392, 93, 41, 32, 166, 58, 135, 12, 2611, 83, 521, 30, 135, 79, 42, 1597, 44, 281, 184, 233, 11, 1411, 54, 60, 92, 26, 50, 56, 13, 16, 70, 1544, 10, 933, 364, 9, 9079, 47, 1509, 11, 140, 292, 11, 4, 1778, 140, 17, 527, 27, 17, 42, 169, 684, 91, 356, 13, 181, 7, 115, 31, 67, 109, 56, 41, 18, 314, 1269, 79, 16, 36, 4, 81, 15, 25, 22, 14, 297, 10, 2859, 295, 952, 214, 8, 45, 28, 16, 227, 8, 89, 29, 76, 577, 70, 109, 12, 46, 126, 70, 476, 7, 10, 213, 17, 38, 11, 576, 973, 34, 11, 4, 7, 9, 83, 7, 151, 20, 15, 214, 792, 36, 77, 13, 23, 214, 150, 28, 26, 27, 6, 32, 7, 420, 56, 134, 7, 763, 139, 6, 7, 430, 141, 2206, 16, 224, 32, 7, 50, 832, 25, 28, 291, 115, 459, 568, 174, 52, 18, 228, 192, 5, 34, 20, 32, 4, 3447, 10, 1083, 14723, 349, 1190, 16, 17, 10422, 99, 13, 16, 1132, 17, 125, 27, 10, 27, 135, 240, 53, 21, 189, 528, 191, 9, 508, 33, 19, 508, 195, 341, 37, 114, 109, 59, 47, 131, 31, 11, 6, 133, 69, 782, 16, 539, 4733, 27, 10, 9, 35, 53, 5, 65, 504, 860, 552, 32, 38, 13, 111, 47, 425, 1386, 1764, 28, 14, 65, 7, 225, 293, 28, 1023, 36, 3581, 275, 978, 16, 5, 110, 166, 219, 59, 11, 37, 166, 34, 94, 1855, 320, 3738, 83, 48, 2745, 568, 20, 262, 16, 5, 13, 787, 5, 8, 33, 7, 809, 21, 213, 842, 1063, 151, 103, 4, 76, 65, 471, 751, 13, 140, 54, 94, 559, 138, 65, 98, 55, 322, 30, 67, 4, 85, 77, 268, 35, 64, 58, 213, 234, 5, 467, 159, 65, 88, 2217, 42, 11, 105, 512, 22, 23, 17, 455, 467, 273, 962, 38, 160, 8, 46, 83, 232, 168, 263, 200, 220, 449, 393, 10, 338, 38, 49, 34, 4, 39, 129, 102, 398, 402, 66, 21, 5, 1830, 17, 1149, 73, 36, 321, 1651, 178, 104, 402, 347, 797, 40, 140, 201, 6, 96, 624, 9, 6, 4, 11, 11, 9, 3471, 570, 85, 48, 1427, 164, 2714, 55, 465, 72, 63, 1704, 174, 4, 10, 84, 4, 249, 11, 4, 128, 18, 34, 1849, 135, 2604, 45, 4, 700, 38, 72, 125, 358, 30, 410, 121, 564, 141, 684, 20, 6, 630, 23, 634, 46, 492, 26, 4, 337, 894, 40, 35, 1275, 127, 136, 35, 11, 43, 90, 250, 66, 4, 63, 11, 12, 5, 1268, 4, 6, 1855, 215, 772, 150, 271, 25, 79, 1015, 2556, 90, 248, 164, 57, 26, 163, 31, 218, 30, 105, 57, 45, 170, 6, 9, 34, 178, 97, 858, 9, 135, 120, 31, 45, 25, 9, 1324, 13, 279, 60, 180, 27, 25, 8, 17, 61, 287, 7, 35, 6, 767, 12, 116, 95, 32, 294, 488, 523, 67, 13, 691, 85, 7, 244, 31, 2241, 55, 23, 1095, 9, 4, 30, 658, 277, 164, 38, 565, 162, 56, 441, 911, 262, 23, 1176, 125, 303, 346, 34, 57, 243, 765, 42, 157, 10, 973, 78, 100, 91, 105, 106, 334, 144, 49, 28, 96, 568, 12, 110, 438, 282, 37, 56, 533, 153, 66, 341, 262, 247, 17, 14, 75, 122, 1096, 53, 1084, 384, 4, 19, 18, 6, 14, 91, 32, 152, 252, 147, 158, 3709, 129, 47, 2579, 64, 11, 108, 51, 5, 88, 675, 84, 105, 386, 79, 162, 263, 48, 67, 93, 163, 253, 1162, 204, 249, 569, 210, 362, 1721, 61, 154, 109, 23, 41, 135, 91, 16, 43, 267, 9, 35, 462, 1545, 31, 236, 69, 20, 1519, 61, 4, 204, 2668, 108, 9, 743, 16, 1749, 62, 119, 48, 3230, 209, 63, 74, 244, 98, 792, 1087, 141, 13, 176, 7, 6, 1103, 181, 17, 79, 30, 1285, 7, 112, 22, 35, 5421, 5, 28, 94, 62, 1858, 5448, 93, 3760, 64, 669, 52, 24, 880, 46, 46, 1920, 281, 14, 25, 20, 1052, 8, 22, 66, 11, 32, 24, 288, 217, 71, 9, 4, 51, 69, 122, 27, 467, 49, 194, 254, 8, 715, 4, 65, 60, 7, 23, 37, 141, 1117, 667, 2432, 277, 16, 5, 317, 613, 70, 3912, 43, 1013, 279, 47, 60, 10, 16, 8, 671, 26, 4, 258, 31, 468, 170, 4, 3236, 4, 12, 15, 9, 360, 14, 4321, 93, 4, 4, 19, 51, 14, 10, 3727, 287, 15, 480, 25, 797, 77, 240, 13, 75, 12, 605, 14, 107, 11, 619, 184, 61, 480, 7, 7, 55, 124, 840, 134, 120, 145, 14, 133, 4, 199, 11, 658, 26, 7, 67, 668, 519, 21, 270, 126, 39, 284, 11, 23, 68, 80, 209, 32, 5, 627, 710, 4819, 39, 4, 14, 20, 4, 496, 10, 15, 198, 19, 717, 13, 2654, 166, 1084, 79, 5, 24, 24, 7, 54, 2289, 6, 70, 78, 68, 70, 4, 21, 194, 82, 869, 30, 1369, 341, 7, 568, 4, 58, 92, 134, 59, 6, 214, 18, 76, 1418, 886, 101, 18, 2807, 61, 112, 115, 32, 98, 342, 200, 189, 28, 8414, 1914, 9, 34, 123, 21, 2726, 136, 35, 8, 163, 95, 7, 212, 1336, 20, 61, 41, 7, 34, 110, 6, 72, 212, 84, 145, 181, 1341, 14, 63, 1850, 116, 570, 539, 54, 343, 69, 165, 282, 1800, 120, 56, 121, 4, 169, 6, 673, 5, 9, 87, 286, 17, 7, 1168, 40, 319, 51, 25, 8, 187, 233, 27, 11, 171, 7284, 1443, 117, 7, 44, 5, 8, 14, 25, 331, 3236, 4, 53, 6, 10, 78, 47, 888, 371, 35, 105, 787, 21, 44, 66, 324, 54, 35, 170, 241, 600, 456, 2123, 62, 12, 159, 6, 37, 6, 110, 8, 787, 743, 12, 764, 74, 83, 6, 4, 14, 112, 701, 1774, 904, 29, 8, 68, 147, 39, 170, 38, 117, 70, 207, 131, 134, 78, 34, 110, 47, 8, 50, 160, 30, 67, 9, 28, 44, 240, 287, 604, 144, 6, 596, 19, 15, 49, 77, 23, 2572, 110, 177, 4, 535, 118, 88, 950, 11, 30, 4, 60, 49, 595, 24, 102, 20, 930, 2687, 193, 23, 4707, 106, 1587, 182, 157, 380, 261, 90, 682, 927, 547, 6, 5, 118, 84, 22, 21, 630, 79, 402, 631, 95, 46, 15, 473, 6, 133, 12, 23, 24, 19, 6, 13, 18, 429, 108, 3276, 11, 18, 825, 501, 109, 48, 132, 64, 61, 876, 21, 167, 781, 73, 75, 62, 13, 1853, 15, 92, 298, 5446, 1807, 1258, 289, 68, 108, 932, 924, 610, 514, 790, 216, 17, 531, 87, 13, 207, 26, 50, 124, 2854, 9, 203, 12, 31, 499, 27, 18, 218, 13, 7, 369, 96, 26, 108, 40, 34, 143, 52, 290, 19, 214, 1278, 39, 27, 183, 101, 26, 13, 102, 25, 117, 102, 19, 476, 383, 18, 100, 1499, 30, 5913, 53, 21, 3656, 72, 110, 101, 6, 62, 6, 902, 670, 14, 20, 260, 466, 570, 388, 62, 56, 51, 9, 63, 40, 134, 109, 901, 211, 48, 469, 891, 5, 11, 6, 94, 27, 38, 280, 122, 140, 27, 22, 548, 179, 25, 463, 10, 553, 165, 56, 53, 91, 958, 12, 1109, 12, 88, 53, 2206, 73, 12, 891, 7, 7, 61, 17, 587, 93, 24, 175, 910, 853, 8, 4, 45, 82, 66, 9, 6, 7, 1240, 175, 121, 90, 115, 475, 772, 4, 1222, 4, 68, 857, 8, 311, 10, 6371, 34, 62, 17, 7, 102, 321, 7, 171, 12, 14, 96, 96, 126, 80, 765, 4, 6377, 16, 8, 39, 23, 10, 35, 130, 19, 53, 9, 7, 2627, 23, 3826, 533, 157, 108, 5, 41, 50, 431, 176, 123, 95, 56, 116, 16, 16, 379, 46, 74, 58, 206, 5, 105, 70, 116, 53, 203, 33, 113, 775, 10, 351, 67, 178, 139, 36, 5, 432, 212, 4, 158, 8, 108, 6, 100, 29, 75, 388, 3130, 538, 147, 5, 119, 40, 6, 39, 323, 4, 38, 789, 4, 7, 777, 38, 18, 787, 6, 4, 117, 258, 4, 38, 9, 126, 147, 13, 52, 35, 15, 519, 1059, 273, 466, 198, 21, 94, 26, 529, 142, 89, 98, 43, 1807, 46, 428, 23, 24, 4099, 11, 2362, 7, 8, 53, 20, 99, 362, 35, 220, 363, 6, 6, 41, 4, 110, 163, 314, 17, 16, 616, 40, 21, 21, 160, 17, 772, 56, 539, 137, 16, 48, 260, 549, 354, 122, 6, 24, 5, 177, 8, 4, 8, 8, 19, 11, 31, 41, 10, 96, 12, 157, 580, 78, 515, 32, 384, 1980, 34, 148, 1430, 214, 895, 459, 13, 6, 18, 89, 34, 56, 6, 901, 18, 122, 2, 72, 47, 6, 77, 118, 30, 62, 2461, 137, 320, 18, 10, 6, 4650, 834, 62, 7, 54, 1389, 16, 16, 34, 204, 71, 162, 28, 44, 798, 5, 24, 359, 210, 25, 7, 231, 119, 822, 41, 280, 284, 61, 6, 29, 4694, 76, 109, 556, 7, 8, 784, 17, 50, 209, 2840, 239, 739, 75, 402, 120, 57, 57, 72, 31, 47, 108, 140, 697, 1238, 38, 57, 28, 106, 5, 45, 2240, 991, 875, 141, 1647, 184, 27, 11, 121, 1058, 1985, 33, 528, 531, 8, 11, 5, 426, 15, 23, 281, 148, 125, 674, 310, 412, 450, 100, 20, 12, 658, 39, 162, 1707, 110, 4090, 6, 30, 108, 24, 13, 58, 34, 239, 5, 4, 188, 9, 321, 81, 46, 787, 679, 1161, 5, 4, 3573, 85, 9, 466, 618, 673, 40, 77, 18, 114, 139, 91, 14, 115, 391, 172, 247, 330, 309, 43, 10, 10, 9, 1087, 6, 49, 31, 553, 87, 149, 89, 23, 17, 38, 10, 326, 5, 597, 4, 247, 426, 119, 1218, 109, 6, 44, 14, 7, 6, 136, 84, 7, 4, 292, 15, 402, 191, 419, 111, 19, 188, 173, 254, 217, 790, 48, 1265, 21, 57, 4, 12, 468, 3618, 44, 24, 795, 7, 258, 15, 23, 18, 8, 375, 42, 1890, 107, 283, 9, 33, 140, 26, 192, 30, 32, 10, 26, 228, 207, 51, 5, 4, 551, 64, 373, 10, 66, 5, 54, 13, 5, 41, 2173, 4, 5, 129, 15, 237, 6998, 275, 187, 70, 107, 8, 176, 22, 29, 428, 20, 24, 4, 130, 1602, 16, 653, 59, 37, 2488, 166, 140, 28, 166, 8, 24, 170, 24, 187, 548, 61, 2047, 11, 7221, 48, 332, 296, 500, 700, 15, 89, 11, 5, 64, 42, 406, 19, 95, 93, 12, 739, 209, 4, 4, 59, 8, 49, 70, 1390, 130, 1743, 39, 53, 434, 65, 23, 72, 22, 9, 64, 79, 13, 227, 97, 1235, 75, 9, 231, 297, 774, 152, 15, 9, 38, 338, 143, 1734, 70, 510, 16, 249, 8, 14, 372, 6, 10, 466, 230, 1157, 889, 24, 71, 125, 121, 4, 195, 19, 56, 363, 461, 14, 58, 5, 118, 1413, 557, 232, 258, 87, 54, 32, 14, 390, 340, 750, 10, 1593, 108, 405, 30, 20, 9, 132, 29, 721, 272, 52, 802, 454, 214, 61, 298, 871, 211, 28, 67, 19, 116, 141, 174, 145, 465, 3675, 16, 51, 4, 38, 195, 133, 289, 40, 1386, 415, 26, 34, 23, 5, 427, 15, 172, 43, 3617, 522, 2901, 153, 789, 21, 450, 60, 29, 1847, 115, 13, 19, 13, 20, 90, 18, 49, 16, 2906, 469, 17, 33, 6385, 49, 21, 5, 39, 1904, 18, 240, 8, 15, 63, 6, 43, 21, 111, 172, 5, 75, 1320, 1028, 669, 27, 30, 191, 342, 3130, 1811, 110, 35, 74, 9, 224, 10, 13, 1405, 620, 13, 15, 69, 46, 652, 70, 63, 84, 77, 289, 55, 58, 34, 126, 1902, 13, 34, 41, 117, 14, 27, 97, 25, 18, 10, 16, 40, 5, 1558, 217, 17, 12, 28, 6, 25, 25, 15, 605, 39, 115, 6, 599, 161, 150, 22, 12, 81, 513, 106, 54, 14, 90, 561, 12, 48, 1093, 18, 31, 11, 49, 40, 15, 195, 114, 0, 28, 27, 4, 1689, 291, 68, 83, 25, 119, 46, 218, 87, 46, 654, 27, 66, 55, 85, 1804, 16, 328, 69, 6, 36, 55, 523, 72, 2075, 146, 83, 485, 50, 42, 4, 93, 40, 44, 1128, 4, 101, 49, 47, 21, 7, 21, 43, 601, 10, 6, 832, 283, 420, 354, 232, 742, 363, 4, 220, 7, 183, 26, 717, 260, 141, 244, 314, 14, 7, 20, 410, 21, 205, 25, 16, 21, 506, 320, 629, 161, 132, 69, 59, 6, 113, 6, 21, 10, 63, 61, 65, 157, 34, 1428, 81, 438, 171, 66, 12, 156, 10, 25, 8, 201, 110, 604, 65, 13, 72, 180, 59, 2232, 195, 67, 526, 66, 19, 854, 5, 546, 119, 135, 296, 4, 173, 690, 292, 219, 267, 79, 60, 17, 21, 1633, 334, 12, 98, 20, 46, 4678, 236, 13, 56, 6, 334, 10, 819, 968, 556, 17, 18, 348, 717, 262, 354, 439, 1055, 73, 94, 48, 468, 386, 161, 53, 28, 45, 22, 175, 6, 298, 9, 4569, 114, 89, 19, 167, 11, 137, 51, 27, 58, 229, 935, 150, 79, 1418, 13, 46, 354, 53, 65, 10, 6, 18, 8, 533, 48, 37, 1112, 719, 83, 332, 145, 130, 23, 9, 25, 2054, 76, 232, 8, 216, 12, 270, 13, 192, 209, 9, 30, 1774, 60, 70, 28, 214, 162, 4, 7, 4239, 29, 19, 38, 413, 522, 40, 4, 33, 324, 51, 7, 11, 1776, 2838, 1913, 197, 386, 121, 269, 118, 200, 306, 83, 52, 1574, 31, 25, 46, 84, 5, 651, 69, 27, 96, 108, 43, 265, 280, 211, 26, 69, 5, 296, 2039, 7, 282, 16, 64, 126, 33, 40, 24, 229, 31, 4, 13, 57, 10, 132, 647, 34, 141, 374, 41, 675, 80, 145, 154, 20, 584, 259, 1181, 23, 42, 1003, 9, 808, 195, 1075, 186, 70, 4, 55, 624, 32, 14, 457, 4099, 1654, 34, 268, 6, 6, 56, 53, 498, 5, 2396, 559, 20, 19, 29, 14, 2172, 18, 13, 402, 33, 1216, 2286, 28, 5, 224, 43, 55, 13, 12, 10, 70, 8, 35, 2215, 45, 8, 185, 27, 41, 33, 12, 9, 95, 5, 793, 28, 119, 35, 35, 185, 450, 7, 234, 10, 67, 114, 13, 122, 10, 900, 94, 54, 28, 1774, 56, 203, 224, 11, 28, 32, 35, 988, 69, 218, 37, 36, 15, 205, 489, 33, 19, 25, 7238, 1390, 25, 245, 54, 60, 1531, 27, 1143, 39, 841, 206, 14, 23, 0, 40, 100, 93, 29, 10, 265, 236, 71, 10, 8, 13, 11, 204, 17, 33, 31, 17, 109, 23, 21, 17, 98, 298, 49, 10, 36, 130, 134, 141, 8, 571, 152, 138, 349, 15, 17, 160, 12, 11, 118, 8, 160, 5, 95, 5, 1796, 15, 8, 10, 31, 72, 469, 787, 28, 32, 117, 676, 35, 364, 122, 14, 870, 9, 500, 14, 75, 17, 9, 154, 100, 370, 12, 477, 398, 529, 6, 23, 150, 125, 54, 73, 47, 723, 9, 73, 26, 320, 23, 14, 2257, 996, 100, 27, 17, 12, 151, 9, 9, 431, 707, 938, 209] ;
+    var rating = [4.3, 3.3, 3.7, 4.1, 3.5, 4.0, 3.6, 4.4, 3.8, 4.2, 3.1, 4.1, 4.5, 3.4, 3.8, 4.0, 3.2, 3.5, 3.9, 3.7, 4.2, 4.6, 3.7, 3.9, 4.4, 3.3, 3.6, 4.0, 3.5, 3.6, 4.2, 4.3, 3.8, 3.1, 3.0, 3.9, 3.4, 4.3, 4.0, 4.1, 4.2, 3.4, 4.1, 3.7, 3.5, 3.9, 3.9, 4.3, 4.2, 3.8, 3.7, 3.4, 4.1, 3.8, 3.8, 3.4, 4.1, 3.6, 3.6, 4.2, 3.5, 2.9, 2.4, 3.3, 3.5, 4.0, 3.3, 3.2, 3.4, 3.9, 3.0, 3.8, 3.2, 4.5, 3.4, 3.8, 4.3, 3.9, 3.0, 3.5, 4.4, 3.8, 3.3, 4.1, 4.1, 3.7, 3.5, 3.9, 2.7, 3.7, 3.2, 4.0, 4.2, 3.3, 4.1, 3.1, 3.9, 3.9, 3.2, 3.9, 3.2, 3.6, 3.6, 4.2, 4.1, 3.3, 4.2, 4.2, 4.2, 4.0, 3.8, 3.7, 3.7, 4.1, 3.8, 3.8, 3.0, 3.7, 4.5, 3.5, 3.7, 4.3, 4.4, 4.4, 3.7, 3.8, 3.6, 4.4, 4.1, 3.3, 3.3, 3.9, 3.1, 3.5, 3.9, 3.4, 4.4, 3.4, 3.6, 3.2, 3.7, 3.4, 3.4, 3.8, 4.0, 4.0, 4.2, 3.6, 4.0, 3.9, 4.0, 4.6, 4.4, 3.3, 3.9, 4.6, 3.8, 3.1, 3.4, 3.7, 3.7, 3.6, 4.2, 3.2, 3.6, 3.8, 3.4, 3.1, 3.9, 4.1, 4.0, 4.1, 3.0, 3.3, 3.1, 4.5, 4.0, 3.6, 4.2, 2.9, 3.5, 3.6, 4.0, 3.6, 3.5, 4.0, 3.6, 4.4, 3.7, 3.9, 3.2, 3.8, 3.3, 3.9, 2.8, 4.1, 3.8, 3.8, 3.2, 2.9, 3.9, 4.4, 3.9, 2.3, 3.6, 3.5, 2.8, 4.3, 4.1, 3.1, 3.1, 4.4, 3.5, 3.4, 3.3, 3.9, 3.5, 2.9, 3.5, 3.2, 3.1, 3.1, 4.0, 3.8, 4.3, 3.8, 3.3, 3.8, 4.0, 2.9, 4.0, 4.4, 4.1, 3.9, 3.6, 4.0, 3.4, 3.2, 2.2, 4.7, 3.3, 4.1, 4.0, 3.9, 3.6, 3.7, 3.4, 3.7, 3.9, 3.4, 3.0, 4.0, 4.2, 3.6, 3.9, 4.6, 4.0, 3.7, 4.1, 4.5, 3.4, 3.6, 2.6, 3.9, 2.6, 3.7, 4.0, 3.1, 3.5, 3.6, 4.3, 3.7, 4.0, 3.7, 3.9, 3.3, 3.8, 3.9, 2.8, 3.8, 3.8, 3.2, 4.1, 3.8, 2.9, 4.2, 3.1, 3.7, 3.1, 3.2, 3.6, 3.2, 3.7, 3.5, 4.2, 4.1, 4.2, 3.6, 2.8, 4.1, 4.1, 3.9, 4.4, 3.9, 3.9, 3.4, 3.6, 3.7, 3.5, 3.9, 4.4, 3.1, 4.1, 4.0, 4.0, 3.2, 3.9, 4.4, 3.5, 3.5, 3.6, 4.1, 2.9, 3.9, 4.7, 2.5, 3.9, 3.8, 3.6, 3.3, 4.0, 3.8, 4.3, 3.5, 3.2, 3.3, 4.1, 3.2, 3.3, 3.4, 3.8, 2.8, 4.1, 4.1, 3.9, 3.4, 3.2, 2.9, 3.6, 3.6, 3.4, 4.1, 3.8, 3.9, 3.5, 3.3, 4.4, 4.3, 4.0, 3.9, 4.3, 3.8, 4.0, 3.1, 3.3, 3.7, 3.4, 3.2, 4.5, 3.5, 3.6, 3.1, 4.4, 3.1, 4.0, 3.5, 3.6, 4.5, 4.1, 4.6, 3.9, 3.8, 3.7, 2.6, 3.1, 4.2, 4.1, 3.9, 4.1, 3.8, 3.6, 3.5, 4.1, 4.1, 3.7, 4.0, 4.2, 3.8, 4.1, 3.9, 3.9, 3.4, 3.5, 3.3, 3.6, 4.1, 3.7, 4.0, 3.9, 4.7, 3.6, 4.0, 3.3, 4.0, 3.8, 4.4, 3.3, 4.0, 2.9, 3.2, 4.4, 3.2, 3.9, 3.6, 4.3, 4.0, 3.5, 3.4, 3.3, 3.8, 3.6, 4.0, 4.1, 4.1, 4.1, 3.8, 4.0, 3.8, 2.9, 4.0, 3.7, 3.2, 3.0, 3.3, 3.8, 3.6, 3.8, 2.8, 3.3, 4.1, 3.7, 4.2, 4.6, 3.5, 2.7, 4.3, 4.1, 4.1, 2.6, 3.5, 4.6, 3.3, 3.8, 2.9, 3.3, 3.1, 3.6, 3.9, 3.8, 3.9, 4.1, 3.7, 3.8, 3.6, 3.6, 2.2, 3.1, 3.7, 3.9, 4.0, 3.6, 3.6, 3.8, 3.8, 3.4, 4.3, 3.8, 4.2, 3.6, 4.2, 4.2, 3.5, 4.0, 3.9, 3.7, 4.1, 3.5, 4.2, 2.9, 4.1, 3.3, 4.5, 3.8, 4.1, 3.2, 3.8, 3.6, 4.5, 4.5, 3.6, 4.0, 4.1, 3.9, 3.6, 4.1, 3.9, 3.7, 4.1, 3.7, 3.7, 3.7, 3.4, 3.6, 3.9, 4.2, 3.6, 4.0, 4.1, 3.5, 4.4, 3.2, 4.0, 3.4, 3.5, 4.0, 3.4, 3.1, 4.0, 3.9, 3.6, 3.8, 3.5, 3.7, 3.6, 4.3, 3.2, 3.9, 3.4, 3.5, 4.0, 3.1, 3.9, 3.7, 3.8, 4.4, 3.9, 3.6, 2.6, 4.0, 4.3, 3.6, 3.3, 3.6, 3.3, 3.7, 3.5, 3.1, 3.7, 3.4, 4.1, 3.2, 4.2, 4.1, 4.1, 3.7, 3.8, 3.5, 3.7, 3.8, 2.8, 3.4, 3.4, 3.0, 3.7, 4.5, 3.9, 4.0, 3.3, 3.8, 4.0, 3.7, 4.2, 3.1, 3.2, 4.2, 3.2, 3.8, 3.1, 4.0, 4.1, 3.1, 3.3, 3.2, 3.4, 3.2, 3.8, 3.3, 3.8, 3.5, 3.5, 3.7, 4.3, 3.9, 3.8, 3.6, 3.8, 3.9, 3.9, 3.4, 3.6, 3.2, 3.4, 3.6, 3.4, 2.8, 2.4, 4.0, 3.1, 3.8, 3.8, 3.2, 3.4, 3.9, 3.9, 4.2, 3.6, 4.0, 2.4, 3.5, 4.1, 3.8, 3.7, 3.4, 2.3, 3.8, 4.1, 4.4, 4.4, 3.5, 3.2, 3.3, 3.2, 3.3, 3.6, 3.8, 3.6, 3.2, 4.3, 3.7, 4.3, 4.7, 4.0, 3.9, 3.4, 3.6, 4.7, 3.8, 3.2, 3.3, 4.4, 3.5, 3.7, 3.6, 3.1, 3.8, 3.8, 3.9, 3.0, 3.5, 3.8, 4.0, 3.9, 3.4, 4.0, 4.1, 3.3, 4.2, 4.0, 4.3, 3.7, 3.7, 3.8, 3.5, 3.9, 3.8, 4.0, 3.1, 3.2, 3.9, 3.1, 4.3, 3.4, 4.3, 4.2, 3.1, 3.1, 3.7, 3.5, 4.1, 3.3, 4.0, 4.2, 4.2, 4.3, 3.7, 3.1, 3.7, 3.8, 4.0, 2.7, 4.3, 4.3, 3.7, 3.4, 3.7, 3.4, 4.3, 4.0, 3.9, 4.2, 3.7, 4.2, 4.0, 4.4, 3.7, 3.3, 4.1, 3.2, 4.1, 3.1, 3.6, 3.7, 2.9, 3.9, 3.6, 4.2, 3.9, 4.4, 3.7, 3.4, 4.9, 4.1, 3.6, 3.9, 3.6, 3.2, 3.6, 4.3, 3.3, 3.3, 3.5, 3.6, 4.4, 3.6, 3.0, 4.1, 4.1, 3.1, 4.0, 3.7, 3.8, 3.4, 4.1, 3.9, 3.5, 3.5, 2.9, 3.6, 4.1, 4.0, 4.0, 3.0, 3.7, 4.3, 3.1, 3.9, 3.2, 3.9, 3.9, 4.2, 3.9, 3.6, 3.8, 4.0, 3.8, 3.3, 4.2, 3.8, 3.9, 3.8, 4.2, 2.6, 3.5, 3.9, 4.3, 3.6, 2.9, 3.4, 3.7, 4.4, 3.3, 4.3, 3.1, 3.8, 3.4, 2.8, 3.8, 3.9, 3.7, 4.2, 4.5, 3.7, 4.3, 4.3, 3.5, 3.9, 3.8, 3.8, 3.7, 3.2, 3.6, 4.1, 4.0, 3.0, 2.7, 3.5, 3.7, 3.2, 4.4, 2.9, 4.2, 3.2, 3.6, 4.1, 4.2, 4.0, 3.6, 4.0, 4.0, 4.0, 3.9, 3.6, 3.9, 3.3, 4.1, 4.0, 3.4, 3.4, 3.2, 3.4, 3.5, 3.3, 4.5, 4.3, 4.0, 3.9, 4.2, 3.8, 4.2, 4.1, 4.1, 3.9, 3.4, 4.2, 4.4, 3.2, 3.3, 2.6, 3.2, 2.7, 3.4, 3.2, 4.0, 3.1, 3.7, 3.9, 3.9, 4.6, 4.1, 3.3, 4.3, 3.3, 3.8, 3.5, 4.1, 3.7, 3.8, 3.6, 3.0, 3.8, 3.9, 3.7, 3.2, 4.0, 3.1, 4.6, 3.4, 3.7, 3.5, 3.2, 4.2, 4.3, 3.9, 3.1, 3.0, 4.2, 3.7, 3.8, 3.4, 3.5, 4.0, 4.2, 3.7, 3.3, 3.4, 3.4, 3.8, 3.3, 4.3, 3.3, 3.4, 4.1, 3.7, 4.3, 4.0, 4.2, 2.9, 3.2, 3.7, 4.6, 3.5, 3.7, 4.3, 3.8, 3.8, 3.1, 3.6, 3.6, 3.7, 3.9, 3.0, 3.6, 3.8, 3.4, 3.3, 3.6, 3.7, 3.1, 4.2, 3.5, 4.0, 3.9, 3.5, 3.6, 3.7, 3.4, 4.1, 3.5, 3.6, 3.8, 4.2, 3.6, 3.7, 2.9, 3.7, 3.6, 3.7, 3.1, 3.5, 3.1, 4.2, 3.6, 4.1, 3.7, 3.7, 4.1, 4.1, 4.4, 3.9, 2.8, 4.0, 2.7, 3.3, 3.9, 3.1, 4.4, 4.3, 3.7, 4.4, 3.2, 3.2, 3.4, 4.4, 3.6, 4.2, 3.8, 4.5, 4.0, 3.3, 3.9, 3.3, 4.1, 3.9, 3.9, 3.7, 2.8, 2.6, 3.8, 3.8, 4.1, 4.1, 3.2, 4.0, 3.1, 4.2, 4.3, 3.1, 3.8, 4.4, 2.8, 4.5, 3.5, 3.3, 3.0, 4.1, 4.1, 3.3, 3.3, 2.4, 3.9, 3.8, 3.5, 4.2, 3.9, 3.7, 4.5, 3.8, 3.9, 3.1, 3.4, 3.8, 3.9, 4.0, 3.9, 4.0, 4.4, 3.4, 3.6, 3.6, 3.2, 3.5, 3.8, 3.6, 4.0, 4.1, 4.1, 3.9, 4.5, 4.0, 3.5, 4.4, 3.0, 3.7, 3.8, 3.9, 3.2, 3.9, 4.1, 3.3, 3.1, 4.2, 4.0, 3.9, 3.8, 3.8, 3.7, 3.2, 4.1, 4.0, 3.8, 4.1, 2.7, 4.0, 3.8, 4.4, 4.2, 3.8, 4.0, 4.0, 3.8, 3.8, 3.7, 3.8, 3.7, 4.0, 3.8, 3.5, 2.7, 3.9, 4.1, 4.0, 3.9, 3.8, 2.8, 4.0, 2.7, 3.2, 3.2, 4.5, 4.0, 3.4, 4.2, 3.0, 4.9, 3.6, 3.1, 3.9, 4.2, 4.1, 3.4, 2.7, 3.8, 4.0, 4.4, 4.0, 3.7, 3.5, 3.6, 3.2, 3.1, 4.3, 4.0, 3.4, 3.6, 3.1, 4.2, 3.2, 3.7, 3.6, 3.6, 4.6, 3.2, 3.4, 2.8, 3.8, 4.1, 4.6, 3.9, 4.6, 2.8, 4.4, 3.4, 3.5, 3.9, 3.7, 3.9, 4.2, 4.0, 3.4, 3.0, 3.2, 4.1, 3.4, 3.4, 3.7, 3.5, 2.8, 2.9, 4.0, 3.8, 4.0, 2.9, 3.3, 2.9, 4.0, 3.9, 3.7, 3.9, 3.7, 4.4, 3.8, 3.1, 3.9, 3.3, 4.0, 4.1, 3.4, 3.3, 3.9, 3.7, 4.1, 4.0, 4.0, 3.6, 3.6, 3.2, 4.3, 3.8, 3.7, 4.7, 3.4, 4.0, 4.1, 3.5, 3.6, 3.3, 3.3, 3.3, 4.1, 3.7, 3.2, 4.1, 3.5, 4.0, 3.8, 3.2, 4.2, 3.3, 3.9, 3.9, 3.3, 3.9, 3.3, 4.3, 3.7, 3.3, 3.3, 2.9, 3.9, 3.5, 3.6, 4.4, 4.3, 3.4, 4.4, 3.6, 4.0, 4.1, 4.1, 2.8, 3.9, 3.6, 4.3, 3.5, 4.0, 3.3, 4.2, 3.8, 3.7, 4.3, 3.7, 3.2, 2.8, 3.6, 4.1, 3.9, 3.9, 3.7, 3.5, 3.6, 3.4, 3.9, 3.5, 4.4, 3.8, 3.2, 3.9, 3.9, 3.6, 3.5, 3.5, 2.9, 3.6, 4.0, 3.5, 3.2, 3.5, 3.8, 4.1, 3.6, 3.5, 3.9, 4.1, 4.7, 3.7, 3.2, 3.6, 3.9, 3.4, 4.3, 3.4, 3.9, 3.9, 3.6, 3.9, 3.6, 4.3, 3.2, 4.0, 3.9, 3.5, 3.5, 3.7, 3.3, 2.6, 4.6, 3.5, 3.9, 3.9, 3.6, 3.1, 3.2, 3.7, 2.7, 3.4, 4.5, 3.8, 4.0, 3.9, 3.4, 4.0, 3.2, 3.3, 3.6, 4.0, 3.7, 3.2, 3.3, 4.1, 3.7, 4.4, 3.9, 3.5, 3.7, 4.0, 4.1, 4.0, 3.6, 3.0, 3.5, 4.5, 3.3, 2.9, 3.7, 4.5, 4.5, 3.3, 3.7, 4.1, 3.7, 4.6, 3.7, 3.7, 3.5, 3.6, 3.4, 3.4, 3.4, 4.1, 3.8, 4.0, 3.7, 3.3, 3.9, 4.4, 3.2, 4.0, 4.0, 2.6, 3.7, 3.7, 4.1, 3.6, 3.8, 4.1, 2.8, 4.2, 2.9, 3.7, 4.2, 3.8, 4.0, 4.1, 4.3, 3.2, 2.8, 4.6, 3.4, 4.3, 3.4, 4.1, 3.3, 3.5, 3.9, 3.8, 3.3, 3.5, 3.8, 3.6, 4.6, 3.7, 3.4, 3.4, 3.8, 3.9, 2.9, 3.4, 4.1, 4.8, 4.1, 4.1, 3.4, 3.7, 3.2, 3.0, 3.6, 2.7, 3.8, 4.2, 3.3, 3.9, 3.3, 3.6, 3.7, 4.1, 3.5, 4.1, 3.6, 3.9, 4.0, 3.3, 3.9, 3.7, 3.9, 3.9, 3.6, 3.7, 4.0, 4.2, 4.1, 4.2, 2.9, 3.6, 3.7, 3.2, 3.6, 3.3, 3.8, 3.4, 4.5, 4.0, 3.6, 3.9, 3.8, 2.8, 2.9, 3.3, 3.6, 3.7, 4.2, 3.9, 4.3, 4.0, 3.5, 3.6, 3.6, 3.6, 3.8, 3.4, 4.2, 3.8, 3.6, 3.4, 3.9, 3.7, 3.9, 3.7, 2.5, 3.2, 2.9, 4.0, 3.7, 4.2, 3.4, 3.6, 3.7, 3.9, 4.2, 4.1, 3.9, 3.2, 2.7, 3.4, 3.6, 3.8, 3.9, 3.6, 4.3, 3.8, 4.2, 3.4, 4.0, 4.1, 4.0, 4.4, 3.4, 3.1, 3.3, 4.1, 3.7, 2.9, 3.8, 4.0, 3.6, 4.0, 4.5, 4.0, 3.6, 4.6, 3.9, 4.3, 3.4, 4.1, 4.0, 4.2, 3.9, 3.9, 4.0, 2.5, 3.2, 3.3, 3.7, 3.4, 3.5, 3.6, 3.8, 3.9, 4.1, 4.1, 2.9, 3.6, 3.3, 3.8, 3.3, 3.8, 3.2, 3.7, 3.7, 3.3, 3.4, 3.2, 3.6, 4.3, 3.8, 4.3, 3.5, 3.6, 4.1, 4.3, 4.4, 4.0, 4.0, 3.4, 4.1, 4.2, 3.5, 3.0, 4.0, 3.9, 3.9, 3.6, 3.6, 4.4, 3.7, 4.0, 2.3, 4.6, 4.3, 4.3, 3.6, 3.5, 3.6, 4.0, 3.8, 4.0, 4.6, 4.0, 4.1, 3.4, 3.6, 3.8, 3.6, 3.6, 2.9, 3.8, 3.8, 4.2, 3.5, 3.9, 3.4, 3.7, 4.5, 3.7, 3.6, 3.3, 3.4, 3.3, 3.8, 3.7, 3.8, 3.5, 3.2, 3.3, 3.7, 3.8, 2.7, 3.6, 3.9, 4.3, 3.9, 3.7, 4.0, 4.0, 3.9, 3.5, 3.8, 3.6, 3.7, 3.9, 3.0, 4.2, 4.4, 3.7, 4.1, 4.3, 3.9, 4.6, 3.7, 3.8, 4.4, 3.8, 3.3, 4.0, 3.1, 3.4, 3.4, 3.9, 4.0, 3.6, 3.8, 3.8, 3.9, 4.2, 4.1, 3.9, 3.5, 3.8, 3.0, 3.9, 3.1, 3.9, 2.8, 4.3, 4.4, 2.3, 3.8, 4.3, 3.3, 3.4, 3.2, 2.8, 3.7, 2.8, 3.4, 3.4, 3.1, 3.6, 3.8, 4.1, 3.9, 3.6, 4.0, 3.4, 4.0, 4.3, 3.9, 3.8, 3.9, 4.3, 3.3, 4.4, 3.3, 3.9, 4.2, 4.4, 3.3, 3.4, 4.3, 3.2, 3.3, 3.7, 3.5, 4.1, 3.8, 3.7, 3.9, 3.1, 3.7, 3.1, 3.1, 3.7, 3.9, 4.0, 3.2, 3.2, 3.2, 4.3, 3.0, 3.1, 4.0, 3.7, 3.9, 4.3, 3.3, 4.1, 3.3, 3.0, 4.5, 3.3, 3.8, 3.2, 4.6, 3.4, 3.6, 3.5, 3.3, 3.0, 4.1, 3.5, 2.6, 3.0, 3.4, 3.8, 3.7, 3.9, 2.8, 4.1, 3.3, 4.5, 3.6, 3.0, 3.8, 3.1, 3.5, 3.2, 4.1, 3.4, 3.8, 3.1, 2.9, 4.5, 3.7, 4.5, 4.1, 3.9, 3.7, 3.4, 3.6, 4.2, 3.9, 4.0, 3.6, 3.1, 3.8, 4.2, 3.9, 3.7, 4.3, 2.8, 4.0, 3.0, 3.9, 3.4, 3.9, 3.9, 4.2, 3.7, 4.1, 3.8, 3.7, 4.0, 3.6, 4.0, 3.7, 3.7, 3.8, 3.7, 3.4, 4.2, 4.0, 3.1, 3.9, 3.4, 4.0, 3.3, 4.0, 3.4, 3.8, 4.0, 4.3, 4.2, 4.0, 3.1, 4.1, 3.2, 3.4, 2.7, 3.5, 3.4, 3.7, 4.5, 3.2, 3.5, 4.0, 3.8, 3.5, 4.1, 3.3, 3.4, 3.1, 3.9, 3.1, 3.9, 3.5, 4.1, 4.1, 3.3, 4.0, 3.2, 3.9, 4.1, 4.2, 4.3, 4.1, 3.7, 3.7, 2.8, 3.6, 4.0, 4.1, 4.0, 3.5, 3.7, 4.3, 3.7, 4.3, 3.6, 3.1, 4.4, 3.4, 4.4, 3.0, 3.4, 3.9, 3.5, 4.0, 3.8, 3.7, 4.0, 4.4, 3.1, 3.0, 3.5, 3.4, 3.8, 3.7, 4.1, 3.6, 3.1, 3.1, 2.9, 3.1, 3.6, 4.0, 3.8, 4.3, 3.8, 3.6, 4.1, 3.0, 2.9, 3.8, 4.3, 4.2, 3.4, 3.4, 3.7, 3.3, 3.3, 3.4, 3.2, 3.3, 3.1, 3.6, 3.7, 3.6, 3.6, 3.7, 3.9, 3.6, 4.0, 4.4, 3.5, 4.0, 4.0, 3.8, 4.4, 3.6, 4.0, 4.2, 4.2, 4.1, 4.4, 3.3, 3.2, 3.7, 3.9, 3.6, 2.8, 3.4, 4.0, 3.6, 3.1, 3.2, 3.6, 2.7, 3.1, 3.9, 4.1, 3.6, 3.8, 4.1, 4.0, 3.1, 3.8, 3.5, 3.3, 3.7, 4.6, 4.0, 3.0, 2.7, 3.9, 3.6, 3.0, 3.3, 4.4, 2.4, 3.9, 3.5, 3.9, 3.8, 3.2, 3.7, 4.0, 4.2, 3.6, 3.4, 4.2, 3.9, 4.1, 3.9, 4.0, 3.9, 3.1, 3.4, 3.6, 4.6, 3.6, 3.8, 4.2, 3.3, 3.6, 3.9, 2.9, 3.6, 3.8, 4.2, 4.2, 4.5, 3.6, 4.2, 4.0, 3.7, 3.5, 3.9, 3.7, 3.2, 3.0, 3.6, 4.2, 4.5, 3.5, 3.5, 3.5, 3.9, 3.1, 3.7, 4.3, 4.1, 4.2, 4.1, 4.2, 4.1, 3.7, 3.8, 4.1, 4.3, 4.9, 2.9, 4.0, 3.9, 3.5, 3.6, 3.3, 3.8, 3.5, 3.9, 4.0, 4.3, 3.9, 3.8, 3.7, 4.0, 4.3, 3.9, 3.6, 3.2, 4.3, 3.8, 3.8, 4.3, 3.7, 4.4, 3.0, 3.6, 3.0, 3.2, 3.4, 4.0, 3.6, 3.5, 3.2, 3.1, 3.9, 3.2, 3.9, 3.8, 3.7, 4.3, 4.3, 3.8, 3.5, 3.2, 4.7, 3.9, 3.6, 4.1, 4.2, 4.1, 3.9, 3.8, 3.6, 4.2, 3.5, 4.1, 3.4, 4.0, 4.1, 4.1, 3.9, 2.6, 4.1, 4.0, 3.6, 3.6, 3.1, 4.0, 3.1, 3.1, 3.7, 4.3, 3.7, 4.4, 4.0, 3.6, 3.5, 3.8, 3.2, 4.1, 3.2, 4.2, 3.2, 3.8, 4.1, 4.1, 4.0, 4.0, 3.3, 3.8, 3.5, 3.4, 3.2, 3.5, 3.9, 3.2, 3.3, 4.1, 3.0, 3.9, 3.9, 3.2, 4.0, 3.7, 3.8, 4.0, 4.2, 3.7, 4.0, 3.7, 4.3, 3.0, 3.3, 3.3, 3.1, 4.0, 4.3, 4.4, 3.5, 4.0, 3.1, 4.2, 3.2, 2.5, 3.9, 3.5, 4.4, 3.6, 4.1, 3.9, 3.5, 3.4, 3.7, 3.5, 3.7, 3.8, 3.6, 3.7, 3.5, 3.9, 3.7, 3.9, 3.0, 3.3, 3.2, 3.5, 4.0, 4.1, 3.2, 4.0, 3.4, 3.6, 3.5, 3.4, 3.7, 4.2, 3.3, 3.4, 4.1, 3.6, 4.0, 4.2, 3.4, 3.8, 3.6, 3.9, 3.5, 3.6, 2.6, 3.9, 4.3, 3.5, 4.0, 3.7, 4.0, 4.5, 3.7, 4.3, 3.8, 3.0, 4.4, 4.2, 3.9, 3.9, 4.2, 3.3, 3.2, 4.2, 3.6, 3.8, 4.5, 2.7, 4.1, 3.6, 4.2, 3.9, 3.9, 2.8, 4.3, 4.3, 3.4, 2.9, 3.1, 3.3, 3.0, 3.9, 3.9, 3.4, 3.6, 4.2, 3.5, 4.1, 4.0, 3.2, 3.3, 2.9, 3.3, 3.9, 3.9, 3.9, 4.0, 4.2, 3.0, 4.0, 3.7, 3.7, 3.2, 2.7, 3.8, 3.2, 3.6, 4.3, 3.5, 2.8, 4.0, 4.3, 3.8, 3.2, 3.9, 3.7, 4.1, 4.0, 3.9, 3.3, 3.9, 4.3, 3.0, 4.2, 3.9, 3.8, 3.6, 4.2, 3.4, 3.6, 4.2, 3.4, 3.2, 4.4, 3.8, 4.1, 3.5, 3.7, 3.8, 4.1, 4.1, 3.3, 4.0, 3.8, 2.8, 4.4, 4.1, 3.6, 3.9, 3.4, 4.1, 4.0, 4.2, 4.0, 4.1, 3.9, 3.8, 2.9, 3.2, 4.0, 4.2, 3.9, 3.2, 4.3, 3.8, 3.1, 3.2, 3.7, 3.3, 2.3, 3.7, 4.3, 4.1, 3.8, 3.3, 3.9, 3.7, 3.9, 2.3, 4.5, 4.4, 4.0, 2.9, 3.6, 4.3, 4.0, 4.6, 3.7, 4.3, 4.4, 3.6, 3.6, 3.2, 3.3, 4.0, 3.7, 2.8, 3.0, 4.0, 4.2, 3.8, 3.7, 3.8, 3.2, 3.2, 3.3, 4.1, 2.8, 4.3, 4.3, 4.2, 3.4, 3.2, 3.5, 3.9, 4.1, 3.7, 4.1, 3.8, 3.5, 3.6, 3.5, 3.5, 2.2, 3.6, 3.9, 3.2, 4.6, 4.4, 3.6, 3.6, 4.5, 3.7, 3.6, 3.1, 3.4, 4.0, 4.0, 3.9, 3.5, 3.6, 4.2, 3.1, 3.7, 2.7, 3.8, 3.9, 2.8, 2.8, 4.1, 4.3, 3.9, 2.6, 3.7, 3.8, 4.3, 4.3, 4.4, 3.8, 3.7, 4.0, 3.1, 3.1, 3.6, 3.5, 4.1, 4.2, 3.1, 3.6, 4.4, 3.7, 3.9, 3.3, 3.8, 4.0, 2.7, 4.2, 3.8, 3.7, 3.3, 3.7, 4.3, 3.5, 3.6, 3.6, 3.8, 3.6, 3.4, 3.6, 3.8, 3.6, 3.0, 3.7, 3.5, 3.2, 4.4, 3.5, 3.6, 3.5, 3.7, 3.0, 3.0, 3.7, 3.5, 4.2, 3.6, 4.0, 3.4, 3.9, 4.1, 3.8, 3.6, 3.4, 3.8, 3.9, 3.8, 3.4, 3.9, 2.5, 4.0, 3.2, 3.3, 4.4, 3.0, 3.6, 3.2, 3.7, 2.9, 3.1, 3.6, 3.1, 3.4, 3.8, 3.7, 3.3, 4.6, 4.1, 3.7, 3.9, 3.7, 3.2, 3.2, 3.9, 3.8, 3.9, 4.3, 3.6, 2.5, 3.6, 4.1, 4.4, 3.7, 4.0, 3.7, 3.4, 2.9, 4.1, 4.3, 3.8, 4.1, 3.9, 3.6, 3.9, 4.2, 3.8, 3.2, 4.0, 3.8, 3.9, 4.1, 3.3, 4.2, 2.6, 3.7, 3.7, 3.3, 3.0, 3.6, 4.1, 3.4, 3.1, 3.8, 2.7, 3.7, 4.2, 4.4, 4.0, 3.8, 3.3, 3.7, 3.3, 4.4, 3.7, 4.0, 3.9, 4.1, 4.0, 3.7, 3.1, 3.3, 3.6, 3.9, 3.6, 3.9, 3.4, 3.0, 3.7, 4.2, 3.9, 4.0, 3.8, 4.2, 3.1, 2.6, 3.3, 3.7, 3.6, 3.7, 3.1, 3.9, 3.4, 4.1, 2.5, 3.9, 4.2, 3.9, 2.4, 3.8, 3.0, 3.1, 3.9, 3.4, 3.0, 3.5, 3.8, 3.0, 3.8, 3.9, 3.5, 4.0, 4.2, 3.3, 4.4, 3.6, 3.6, 4.3, 3.9, 3.3, 4.3, 3.4, 4.5, 3.5, 3.9, 4.2, 3.4, 3.7, 3.8, 3.2, 4.1, 4.3, 4.2, 3.8, 3.6, 3.4, 4.2, 4.0, 3.4, 3.5, 3.5, 3.7, 4.7, 4.0, 3.1, 2.9, 3.3, 4.0, 3.4, 4.2, 4.3, 4.2, 3.0, 3.5, 4.4, 3.9, 3.0, 4.1, 4.1, 4.3, 4.0, 4.2, 3.7, 4.0, 3.9, 3.9, 3.9, 3.6, 3.6, 3.7, 3.7, 3.3, 3.7, 3.4, 4.5, 3.7, 3.8, 3.4, 4.2, 3.4, 3.8, 2.9, 3.8, 3.1, 4.1, 4.1, 3.9, 3.6, 4.2, 3.2, 3.8, 4.1, 3.8, 4.0, 3.5, 3.3, 3.7, 3.4, 4.2, 2.4, 3.6, 4.1, 4.1, 4.3, 4.0, 4.1, 3.9, 3.7, 3.1, 3.0, 4.4, 4.0, 4.0, 3.4, 4.1, 3.5, 3.2, 3.3, 4.1, 4.0, 3.4, 4.1, 4.2, 3.6, 3.3, 3.7, 3.9, 3.7, 3.1, 3.3, 4.3, 3.1, 3.4, 3.8, 2.8, 4.1, 4.0, 3.3, 3.7, 3.8, 3.2, 3.4, 3.3, 4.3, 4.2, 4.0, 3.6, 4.2, 3.9, 4.3, 3.2, 4.0, 3.7, 3.7, 3.7, 4.1, 3.0, 3.4, 3.7, 4.0, 3.2, 4.2, 2.8, 3.1, 4.0, 3.0, 2.6, 3.8, 4.3, 3.9, 3.8, 4.0, 3.3, 4.1, 4.3, 3.1, 3.8, 3.3, 3.7, 3.8, 3.9, 3.8, 3.5, 3.8, 3.6, 3.2, 3.4, 3.9, 3.5, 2.9, 3.9, 3.7, 3.5, 3.9, 3.6, 3.9, 3.8, 3.7, 4.0, 3.3, 3.8, 3.7, 4.5, 4.0, 3.6, 4.1, 3.4, 4.0, 4.2, 4.1, 3.1, 3.6, 3.2, 3.9, 4.1, 3.7, 3.1, 4.0, 4.4, 4.2, 3.7, 2.9, 3.3, 3.5, 2.6, 2.7, 4.1, 3.0, 4.6, 4.2, 3.6, 3.1, 4.0, 3.6, 4.7, 3.6, 3.8, 2.0, 3.4, 4.4, 4.2, 3.6, 3.3, 4.2, 3.5, 3.0, 3.1, 3.5, 3.4, 3.3, 3.5, 3.9, 4.9, 3.7, 3.2, 3.8, 3.7, 3.5, 3.5, 3.5, 3.3, 4.2, 3.5, 4.3, 3.7, 3.9, 3.6, 3.2, 3.9, 3.9, 3.5, 3.9, 3.2, 3.7, 4.1, 3.6, 3.8, 3.5, 4.5, 3.8, 4.0, 3.1, 4.1, 3.9, 4.4, 3.9, 3.5, 2.9, 3.7, 3.4, 4.0, 3.8, 3.9, 3.8, 3.2, 3.8, 4.1, 4.1, 3.0, 3.7, 4.0, 4.4, 3.9, 3.4, 4.5, 3.1, 3.8, 4.2, 3.9, 3.9, 3.7, 4.1, 3.9, 3.5, 3.6, 3.8, 3.9, 3.9, 3.7, 3.7, 3.3, 3.8, 4.3, 4.0, 3.4, 3.1, 2.8, 3.5, 3.9, 2.8, 3.6, 3.7, 3.5, 3.8, 4.0, 3.5, 3.7, 3.7, 3.6, 3.7, 3.4, 3.8, 3.7, 3.9, 4.0, 3.1, 3.8, 4.0, 4.2, 4.5, 3.0, 3.6, 3.8, 3.5, 3.1, 3.7, 3.5, 3.5, 3.3, 4.1, 3.3, 4.3, 3.6, 3.3, 3.6, 3.7, 3.6, 4.1, 4.1, 3.8, 3.8, 3.9, 4.1, 2.9, 4.0, 3.8, 3.5, 4.0, 3.4, 3.8, 3.5, 2.6, 3.5, 3.1, 4.4, 4.0, 4.0, 3.6, 4.2, 2.0, 4.2, 3.6, 3.4, 3.9, 3.6, 3.4, 3.8, 4.0, 4.3, 3.5, 4.0, 3.1, 3.1, 3.8, 3.1, 4.6, 4.3, 2.6, 3.7, 3.5, 3.6, 3.6, 3.2, 3.5, 3.9, 3.9, 4.0, 4.0] ;
+
+    Plotly.newPlot("plot-votes-vs-rating", [{
+      type: "scatter",
+      mode: "markers",
+      x: votes,
+      y: rating,
+      marker: { size: 8, color: "#a01723" }
+    }], {
+      xaxis: {title: "Votes"},
+      yaxis: {title: "Rating"}
+    }, {displayModeBar: false});
+  })();
+
+  // 6) Feature importance
+  (function() {
+    var features    = ['votes', 'approx_cost_for_two', 'book_table', 'cuisines_North Indian, Chinese', 'online_order', 'location_Koramangala 5th Block', 'cuisines_North Indian', 'location_Marathahalli', 'cuisines_Mexican', 'location_BTM', 'location_Bannerghatta Road', 'location_Indiranagar', 'location_HSR', 'cuisines_North Indian, Continental, Chinese', 'location_Whitefield'] ;
+    var importances = [0.47633251290456446, 0.05528440082467333, 0.01688121251198831, 0.013822684358999013, 0.012592963533279733, 0.007288056109398695, 0.00687267192667149, 0.006680542184698964, 0.005518550058310657, 0.0052159837551552365, 0.005098186573405221, 0.004724317639145567, 0.004663570345329294, 0.00466330057621078, 0.004637102989777729] ;
+
+    Plotly.newPlot("plot-feature-importance", [{
+      type: "bar",
+      x: importances,
+      y: features,
+      orientation: "h",
+      marker: { color: "#cb202d" }
+    }], {
+      margin: {l: 150, r: 20, t: 30, b: 40},
+      xaxis: {title: "Feature importance"}
+    }, {displayModeBar: false});
+  })();
+
+};
+</script>
+
+</body>
+</html>
